@@ -21,18 +21,42 @@ const CreateOrders = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
+  const [dateyear, setDateYear] = useState("");
+  console.log(dateyear , "dateyear")
   const navigate = useNavigate();
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0");
   var yyyy = today.getFullYear();
 
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(
+          `${BASE_URL}/api/web-fetch-year`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log(res)
+        setDateYear(res.data?.year?.current_year);
+      } catch (error) {
+        console.error("Error fetching services:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   today = mm + "/" + dd + "/" + yyyy;
   var todayback = yyyy + "-" + mm + "-" + dd;
   const [order, setOrder] = useState({
     orders_user_id: "",
     orders_date: todayback,
-    orders_year: "2023-24",
+    orders_year: dateyear,
     orders_count: "",
     order_sub_data: "",
   });
@@ -51,6 +75,8 @@ const CreateOrders = () => {
       orders_sub_quantity: "",
     },
   ]);
+
+ 
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -170,7 +196,7 @@ const CreateOrders = () => {
       const token = localStorage.getItem("token");
       let data = {
         orders_user_id: order.orders_user_id,
-        orders_year: order.orders_year,
+        orders_year: dateyear,
         orders_date: order.orders_date,
         orders_count: order_sub_count,
         order_sub_data: items,

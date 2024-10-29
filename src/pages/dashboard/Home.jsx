@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import CountUp from "react-countup";
 
 const Home = () => {
-  const dateyear = ["2023-24"];
+  const [dateyear, setDateYear] = useState("");
   const [recentOrders, setRecentOrders] = useState([]);
   const [products, setProducts] = useState(null);
 
@@ -32,9 +32,32 @@ const Home = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const navigate = useNavigate();
 
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(
+          `${BASE_URL}/api/web-fetch-year`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log(res)
+        setDateYear(res.data?.year?.current_year);
+      } catch (error) {
+        console.error("Error fetching services:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   // Fetch both data sets but manage loading states separately
   const fetchRecentOrders = async () => {
     setLoadingRecentOrders(true);
+    if(dateyear){
     try {
       const response = await axios.get(
         `${BASE_URL}/api/web-fetch-dashboard-data-by/${dateyear}`,
@@ -52,10 +75,16 @@ const Home = () => {
     } finally {
       setLoadingRecentOrders(false);
     }
+  }
   };
+
+
+
 
   const fetchProducts = async () => {
     setLoadingProducts(true);
+    if(dateyear){
+
     try {
       const response = await axios.get(
         `${BASE_URL}/api/web-fetch-dashboard-data-by/${dateyear}`,
@@ -76,12 +105,17 @@ const Home = () => {
     } finally {
       setLoadingProducts(false);
     }
+  }
   };
 
   useEffect(() => {
-    fetchRecentOrders(); // Fetch orders initially
     fetchProducts(); // Fetch products initially
-  }, []);
+  }, [dateyear]);
+
+
+  useEffect(() => {
+    fetchRecentOrders(); // Fetch orders initially
+  }, [dateyear]);
 
   // Reload for recent orders
   const handleReload = () => {

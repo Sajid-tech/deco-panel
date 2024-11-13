@@ -7,6 +7,7 @@ import MUIDataTable from 'mui-datatables';
 import Layout from '../../layout/Layout';
 import CreateOrderFilter from '../../components/CreateOrderFilter';
 import { Visibility } from '@mui/icons-material';
+import moment from 'moment';
 
 const OrderList = () => {
     const [orderList, setOrderList] = useState(null);
@@ -54,7 +55,11 @@ const OrderList = () => {
           options: {
             filter: true,
             sort: true,
+            customBodyRender: (orders_date) => {
+              return moment(orders_date).format("DD-MM-YYYY");
+            }
           },
+          
         },
         {
           name: "orders_no",

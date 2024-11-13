@@ -21,10 +21,12 @@ const status = [
   },
 ];
 
-const EditOrder = () => {
+const AddQuotation = () => {
   const navigate = useNavigate();
 
   const { id } = useParams();
+
+  const [order_sub_count, setCount] = useState(1);
 
   const [order, setOrder] = useState({
     orders_user_id: "",
@@ -39,6 +41,7 @@ const EditOrder = () => {
   const useTemplate = {
     orders_sub_product_id: "",
     orders_sub_quantity: "",
+    orders_sub_rate: "",
     id: "",
   };
   const [users, setUsers] = useState([useTemplate]);
@@ -65,6 +68,7 @@ const EditOrder = () => {
         );
         setOrder(res.data.order);
         setUsers(res.data.orderSub);
+        setCount(res.data.order.orders_count);
       } catch (error) {
         console.error("Error fetching services:", error);
       }
@@ -129,7 +133,7 @@ const EditOrder = () => {
     };
     try {
       const response = await axios.put(
-        `${BASE_URL}/api/web-update-order/${id}`,
+        `${BASE_URL}/api/web-create-quotation-indirect/${id}`,
         formData,
         {
           headers: {
@@ -140,7 +144,7 @@ const EditOrder = () => {
 
       if (response.data.code == 200) {
         toast.success("Order Added Successfully");
-        navigate("/pending-order-list");
+        navigate("/quotations");
       } else {
         if (response.data.code == 401) {
           toast.error("Order Duplicate Entry");
@@ -166,13 +170,13 @@ const EditOrder = () => {
             <MdKeyboardBackspace className=" text-white bg-[#464D69] p-1 w-10 h-8 cursor-pointer rounded-2xl" />
           </Link>
           <h1 className="text-2xl text-[#464D69] font-semibold ml-2 content-center">
-            Edit Order
+            Add Quotation
           </h1>
         </div>
         <div className="p-6 mt-5 bg-white shadow-md rounded-lg">
           <form onSubmit={onSubmit} autoComplete="off">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div className="form-group">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-6">
+              <div className="form-group md:col-span-4">
                 <Fields
                  disabled={true}
                   required={true}
@@ -185,7 +189,7 @@ const EditOrder = () => {
                   options={profile}
                 />
               </div>
-              <div className="form-group">
+              <div className="form-group md:col-span-2">
                 <Input
                  disabled
                   required
@@ -194,29 +198,17 @@ const EditOrder = () => {
                   name="orders_date"
                   value={order.orders_date}
                   onChange={(e) => onInputChange(e)}
-                  InputLabelProps={{
-                    className: "text-red-500", 
+                  labelProps={{
+                    className: "!text-gray-500",
                   }}
-                
                 />
               </div>
-              <div className="form-group ">
-                <Fields
-                  required={true}
-                  title="Status"
-                  type="whatsappDropdown"
-                  autoComplete="Name"
-                  name="orders_status"
-                  value={order.orders_status}
-                  onChange={(e) => onInputChange(e)}
-                  options={status}
-                />
-              </div>
+              
             </div>
             {users.map((user, index) => (
               <div
                 key={index}
-                className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"
+                className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6"
               >
                 <div className="form-group col-span-2">
                   {/* <Input
@@ -251,6 +243,17 @@ const EditOrder = () => {
                     onChange={(e) => onChange(e, index)}
                   />
                 </div>
+                <div className="form-group ">
+                  <Fields
+                    required={true}
+                    title="Rate"
+                    type="textField"
+                    autoComplete="Name"
+                    name="orders_sub_rate"
+                    value={user.orders_sub_rate}
+                    onChange={(e) => onChange(e, index)}
+                  />
+                </div>
               </div>
             ))}
             <div className="mt-4 text-center">
@@ -259,9 +262,9 @@ const EditOrder = () => {
                 className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
                 disabled={isButtonDisabled}
               >
-                {isButtonDisabled ? "Updating..." : "Update"}
+                {isButtonDisabled ? "Submiting..." : "Submit"}
               </button>
-              <Link to="/pending-order-list">
+              <Link to="/quotations">
                 <button className="bg-green-500 text-white px-4 py-2 rounded-md">
                   Back
                 </button>
@@ -274,4 +277,4 @@ const EditOrder = () => {
   );
 };
 
-export default EditOrder;
+export default AddQuotation;

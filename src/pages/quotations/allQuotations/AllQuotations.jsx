@@ -60,6 +60,9 @@ const AllQuotationsList = () => {
       options: {
         filter: true,
         sort: false,
+        customBodyRender: (quotation_date) => {
+          return moment(quotation_date).format("DD-MM-YYYY");
+        }
       },
     },
     {

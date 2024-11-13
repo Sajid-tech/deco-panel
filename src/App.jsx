@@ -37,6 +37,7 @@ import EditOrder from "./pages/createOrders/EditOrder";
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ViewQuotions from "./pages/quotations/quotationsSubmitted/ViewQuotions";
+import AddQuotation from "./pages/quotations/AddQuotation";
 
 
 const App = () => {
@@ -72,6 +73,7 @@ const App = () => {
         <Route path="/products" element={<ProductsList />} />
         <Route path="/add-product" element={<AddProduct />} />
         <Route path="/edit-product/:id" element={<EditProduct />} />
+        <Route path="/add-quotations/:id" element={<AddQuotation />} />
         <Route path="/quotations" element={<QuotationsSubmittedList />} />
         <Route path="/all-quotations" element={<AllQuotationsList />} />
         <Route path="/edit-quotations/:id" element={<EditQuotation />} />

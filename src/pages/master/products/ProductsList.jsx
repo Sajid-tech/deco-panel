@@ -11,7 +11,6 @@ import { Badge, Chip, CircularProgress, Stack } from "@mui/material";
 
 const ProductsList = () => {
   const [productData, setProductData] = useState(null);
-  console.log(productData , "productData")
   const [loading, setLoading] = useState(false);
   const { isPanelUp } = useContext(ContextPanel);
   const navigate = useNavigate();
@@ -76,6 +75,10 @@ const ProductsList = () => {
       options: {
         filter: true,
         sort: false,
+        customBodyRender: (value, tableMeta) =>{
+          const products_unit = productData[tableMeta.rowIndex].products_unit;
+          return value+" "+products_unit;
+        },
       },
     },
     {
@@ -84,6 +87,10 @@ const ProductsList = () => {
       options: {
         filter: true,
         sort: false,
+        customBodyRender: (value, tableMeta) =>{
+          const products_size2 = productData[tableMeta.rowIndex].products_size2;
+          return value+" x "+products_size2;
+        },
       },
     },
     {

@@ -17,7 +17,6 @@ import {
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import { Edit, Visibility } from "@mui/icons-material";
 import QuotationsFilter from "../../../components/quotationsFilter";
-
 import moment from "moment";
 import { toast } from "react-toastify";
 
@@ -226,6 +225,7 @@ const QuotationsSubmittedList = () => {
           data={brandListData ? brandListData : []}
           columns={columns}
           options={options}
+          
         />
       </div>
     </Layout>

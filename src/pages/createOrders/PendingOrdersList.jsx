@@ -165,12 +165,9 @@ const PendingOrdersList = () => {
                       localStorage.getItem("user_type_id") == 1 ? "none" : "",
                   }}
                 >
-                  <a
-                    style={{ color: "rgba(13, 126, 247, 0.54)" }}
-                    onClick={(e) => sendEmail(e, id)}
-                  >
+                  <Link to={`/add-quotations/${id}`}>
                     <ConfirmationNumberIcon />
-                  </a>
+                  </Link>
                 </IconButton>
               </Tooltip>
               <Tooltip title="View" placement="top">

@@ -4,6 +4,7 @@ import Layout from '../../layout/Layout'
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import BASE_URL from '../../base/BaseUrl';
+import moment from 'moment';
 
 const ViewList = () => {
     const [viewOrder, setViewOrder] = useState(null);
@@ -78,7 +79,7 @@ const ViewList = () => {
             </div>
             <div className="text-right">
               <p className="font-semibold text-black">Order Date:</p>
-              <p className="text-black">{viewOrder.order?.orders_date}</p>
+              <p className="text-black">{moment(viewOrder.order.orders_date).format('DD-MM-YYYY')}</p>
             </div>
           </div>
 

@@ -45,6 +45,7 @@ const AppProvider = ({ children }) => {
           "/user-team",
           "/profile",
           "/user-app",
+          "/add-quotations",
           "/quotation-report",
           "/view-quotions",
           "/pending-order-list",

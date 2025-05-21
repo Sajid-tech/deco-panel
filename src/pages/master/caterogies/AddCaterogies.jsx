@@ -14,6 +14,7 @@ const AddCaterogies = () => {
   const [category, setCategory] = useState({
     product_category: "",
     product_category_image: "",
+    product_sort: "",
 });
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -27,12 +28,23 @@ const AddCaterogies = () => {
   }, []);
 
   const onInputChange = (e) => {
-    setCategory({
-    ...category,
-    [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
 
-};
+  
+    if (name === "product_sort") {
+      if (/^\d*$/.test(value)) { 
+        setCategory({
+          ...category,
+          [name]: value,
+        });
+      }
+    } else {
+      setCategory({
+        ...category,
+        [name]: value,
+      });
+    }
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -45,6 +57,7 @@ const AddCaterogies = () => {
     const formData = new FormData();
     formData.append("product_category", category.product_category);
     formData.append("product_category_image", selectedFile);
+    formData.append("product_sort", category.product_sort);
     // const formData = {
     //     product_category: category.product_category,
     //     product_category_image: selectedFile,
@@ -91,7 +104,7 @@ const AddCaterogies = () => {
             <MdKeyboardBackspace className=" text-white bg-[#464D69] p-1 w-10 h-8 cursor-pointer rounded-2xl" />
           </Link>
           <h1 className="text-2xl text-[#464D69] font-semibold ml-2 content-center">
-            Add Caterogies
+            Add Categories
           </h1>
         </div>
         <div className="p-6 mt-5 bg-white shadow-md rounded-lg">
@@ -111,7 +124,18 @@ const AddCaterogies = () => {
                 />
               </div>
 
-             
+                <div className="form-group">
+                             <Fields
+                               required={true}
+                               types="number"
+                               title="Sort"
+                               type="textField"
+                               autoComplete="off"
+                               name="product_sort"
+                               value={category.product_sort}
+                               onChange={(e) => onInputChange(e)}
+                             />
+                           </div>
               <div>
                 <Input
                   required
@@ -139,6 +163,9 @@ const AddCaterogies = () => {
             </div>
           </form>
         </div>
+
+     
+  
       </div>
     </Layout>
   );

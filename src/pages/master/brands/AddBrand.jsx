@@ -13,6 +13,7 @@ const AddBrand = () => {
 
   const [brand, setBrand] = useState({
     brands_name: "",
+    brands_image:"",
   });
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -40,9 +41,10 @@ const AddBrand = () => {
       return;
     }
     setIsButtonDisabled(true);
-    const formData = {
-      brands_name: brand.brands_name,
-    };
+    const formData = new FormData();
+  
+    formData.append("brands_name", brand.brands_name);
+    formData.append("brands_image", selectedFile);
     try {
       const response = await axios.post(
         `${BASE_URL}/api/web-create-brand`,
@@ -101,6 +103,15 @@ const AddBrand = () => {
                   onChange={(e) => onInputChange(e)}
                 />
               </div>
+              <div>
+                              <Input
+                                required
+                                type="file"
+                                label="Image"
+                                name="brands_image"
+                                onChange={(e) => setSelectedFile(e.target.files[0])}
+                              />
+                            </div>
               <div >
                 <button
                   type="submit"

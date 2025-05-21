@@ -9,7 +9,6 @@ import Profile from "./pages/profile/Profile";
 import ChangePassword from "./pages/profile/ChangePassword";
 import TeamList from "./pages/users/team/TeamList";
 import AppUserList from "./pages/users/appUser/AppUserList";
-import ProductReportList from "./pages/reports/Product/ProductReportList";
 import OrderList from "./pages/dashboard/OrderList";
 import ViewList from "./pages/dashboard/ViewList";
 import FormOrderDetails from "./pages/reports/order/FormOrderDetails";
@@ -38,10 +37,12 @@ import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ViewQuotions from "./pages/quotations/quotationsSubmitted/ViewQuotions";
 import AddQuotation from "./pages/quotations/AddQuotation";
+import ProductReportList from "./pages/reports/Product/ProductReportList";
 
 
 const App = () => {
   return (
+    
     <>
      <ToastContainer />
       <Routes>
@@ -57,6 +58,7 @@ const App = () => {
         <Route path="/product-report" element={<ProductReportList />} />
         <Route path="/create-order" element={<CreateOrders />} />
         <Route path="/order-list" element={<OrderList />} />
+        <Route path="/order-list-nav" element={<OrderList />} />
         <Route path="/pending-order-list" element={<PendingOrdersList />} />
         <Route path="/view-order/:id" element={<ViewList />} />
         <Route path="/view-quotions/:id" element={<ViewQuotions />} />
@@ -92,10 +94,7 @@ const App = () => {
           element={<ProtectedRoute element={<ChangePassword />} />}
         />
 
-        {/* <Route
-          path="*"
-          element={<ProtectedRoute element={<Navigate to="/" />} />}
-        /> */}
+      
       </Routes>
     </>
   );

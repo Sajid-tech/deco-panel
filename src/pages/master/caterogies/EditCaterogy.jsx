@@ -21,37 +21,36 @@ const status = [
 
 const EditCaterogy = () => {
   const navigate = useNavigate();
-
   const { id } = useParams();
-
-
-
   const [category, setCategory] = useState({
     product_category: "",
     product_category_status: "",
     product_category_image: "",
+    product_sort: "",
   });
 
   const [selectedFile, setSelectedFile] = useState(null);
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
-//   useEffect(() => {
-//     const isLoggedIn = localStorage.getItem("id");
-//     if (!isLoggedIn) {
-//       navigate("/");
-//       return;
-//     }
-//   }, []);
+const onInputChange = (e) => {
+  const { name, value } = e.target;
 
-  const onInputChange = (e) => {
+  
+  if (name === "product_sort") {
+    if (/^\d*$/.test(value)) { 
+      setCategory({
+        ...category,
+        [name]: value,
+      });
+    }
+  } else {
     setCategory({
       ...category,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
-  };
-
-
+  }
+};
 
 useEffect(() => {
     const fetchData = async () => {
@@ -81,46 +80,13 @@ useEffect(() => {
       return;
     }
     setIsButtonDisabled(true);
-    // const formData = {
-    //   product_category: category.product_category,
-    //   product_category_status: category.product_category_status,
-    //   product_category_image: selectedFile,
-    // };
    
-    // try {
-    //   const response = await axios.post(
-    //     `${BASE_URL}/api/web-update-category/${id}?_method=PUT`,
-    //     formData,
-    //     {
-    //       headers: {
-    //         Authorization: `Bearer ${localStorage.getItem("token")}`,
-    //       },
-    //     }
-    //   );
-
-    //   if (response.data.code == 200) {
-    //     toast.success("Caterogies Updated Successfully");
-    //     navigate("/categories");
-    //   } else {
-    //     if (response.data.code == 401) {
-    //       toast.error("Caterogies Duplicate Entry");
-    //     } else if (response.data.code == 402) {
-    //       toast.error("Caterogies Duplicate Entry");
-    //     } else {
-    //       toast.error("An unknown error occurred");
-    //     }
-    //   }
-    // } catch (error) {
-    //   console.error("Error updating Caterogies:", error);
-    //   toast.error("Error  updating Caterogies");
-    // } finally {
-    //   setIsButtonDisabled(false);
-    // }
     const data = new FormData();
     data.append("product_category", category.product_category);
     data.append("product_category_image", selectedFile);
     data.append("product_category_status", category.product_category_status);
-    console.log(data , "res");
+    data.append("product_sort", category.product_sort);
+ 
     axios({
       url: `${BASE_URL}/api/web-update-category/${id}?_method=PUT`,
       method: "POST",
@@ -129,7 +95,7 @@ useEffect(() => {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     }).then((res) => {
-      if (res.data.code == 200) {
+      if (res.data.code === 200) {
         toast.success("Caterogies Updated Successfully");
         navigate("/categories");
         setIsButtonDisabled(false);
@@ -176,6 +142,18 @@ useEffect(() => {
                       autoComplete="Name"
                       name="product_category"
                       value={category.product_category}
+                      onChange={(e) => onInputChange(e)}
+                    />
+                  </div>
+  <div className="form-group">
+                    <Fields
+                      required={true}
+                      types="number"
+                      title="Sort "
+                      type="textField"
+                      autoComplete="off"
+                      name="product_sort"
+                      value={category.product_sort}
                       onChange={(e) => onInputChange(e)}
                     />
                   </div>

@@ -4,7 +4,7 @@ import ReportFilter from '../../../components/ReportFilter'
 import { ContextPanel } from '../../../utils/ContextPanel';
 import { useNavigate } from 'react-router-dom';
 import MUIDataTable from 'mui-datatables';
-import { IconButton } from '@mui/material';
+import { CircularProgress, IconButton } from '@mui/material';
 import { FaRegFilePdf } from 'react-icons/fa';
 import axios from 'axios';
 import jsPDF from "jspdf";
@@ -47,7 +47,7 @@ const ProductReportList = () => {
       }
     };
     fetchProductReprot();
-    setLoading(false);
+    
   }, []);
 
   const handleSavePDF = () => {
@@ -87,7 +87,7 @@ const ProductReportList = () => {
       label: "Sub Category",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     {
@@ -95,7 +95,7 @@ const ProductReportList = () => {
       label: "Brand",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     {
@@ -103,7 +103,7 @@ const ProductReportList = () => {
         label: "Thickness",
         options: {
           filter: true,
-          sort: false,
+          sort: true,
           customBodyRender: (value, tableMeta) => {
             const products_thickness = tableMeta.rowData[3];
             const products_unit = tableMeta.rowData[4];
@@ -123,7 +123,7 @@ const ProductReportList = () => {
         label: "Size",
         options: {
           filter: true,
-          sort: false,
+          sort: true,
           customBodyRender: (value, tableMeta) => {
             const products_size1 = tableMeta.rowData[5];
             const products_size2 = tableMeta.rowData[6];
@@ -150,7 +150,7 @@ const ProductReportList = () => {
         label: "Rate",
         options: {
           filter: true,
-          sort: false,
+          sort: true,
         },
       },
     
@@ -159,7 +159,7 @@ const ProductReportList = () => {
       label: "Status",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     
@@ -173,14 +173,12 @@ const ProductReportList = () => {
     pagination: false,
     search: false,
     filter: false,
-    rowsPerPage: 100000, // Set to a large number to show all rows
-    rowsPerPageOptions: [], // Empty array to hide rows per page dropdown
-    // rowsPerPage: 5,
-    // rowsPerPageOptions: [5, 10, 25],
+    rowsPerPage: 100000, 
+    rowsPerPageOptions: [], 
+
     responsive: "standard",
     viewColumns: false,
-    // Add custom toolbar for PDF export
-    // Add custom toolbar for PDF export
+  
     customToolbar: () => {
       return (
         <IconButton
@@ -193,19 +191,25 @@ const ProductReportList = () => {
         </IconButton>
       );
     },
+     textLabels: {
+                  body: {
+                    noMatch: loading ? (
+                      <CircularProgress />
+                    ) : (
+                      "Sorry, there is no matching data to display"
+                    ),
+                  },
+                },
   };
 
   return (
    <Layout>
     <ReportFilter/>
-    <div className="flex flex-col md:flex-row justify-between items-center bg-white mt-5 p-2 rounded-lg space-y-4 md:space-y-0">
-        <h3 className="text-center md:text-left text-lg md:text-xl font-bold">
-          Product Report
-        </h3>
-      </div>
+   
 
-      <div className="mt-5" ref={tableRef}>
+      <div className="mt-1" ref={tableRef}>
         <MUIDataTable
+        title ="Product Report"
           data={productReport ? productReport : []}
           columns={columns}
           options={options}
@@ -214,5 +218,6 @@ const ProductReportList = () => {
    </Layout>
   )
 }
+
 
 export default ProductReportList

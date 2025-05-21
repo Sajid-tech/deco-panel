@@ -2,7 +2,7 @@ import MUIDataTable from 'mui-datatables'
 import React, { useEffect,  useMemo,useState } from 'react'
 import BASE_URL from '../base/BaseUrl';
 import axios from 'axios';
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 
 const SelectProduct = ({ onSelect, itemIndex }) => {
     const [selectProducts, setSelectProducts] = useState(null);
@@ -26,7 +26,7 @@ const SelectProduct = ({ onSelect, itemIndex }) => {
         }
       };
       fetchProduct();
-      setLoading(false);
+     
     }, []);
   
     const handleSelect = (id) => {
@@ -51,7 +51,7 @@ const SelectProduct = ({ onSelect, itemIndex }) => {
           label: "Sub Category",
           options: {
             filter: true,
-            sort: false,
+            sort: true,
           },
         },
         {
@@ -59,7 +59,7 @@ const SelectProduct = ({ onSelect, itemIndex }) => {
           label: "Brand",
           options: {
             filter: true,
-            sort: false,
+            sort: true,
           },
         },
         {
@@ -67,7 +67,7 @@ const SelectProduct = ({ onSelect, itemIndex }) => {
           label: "Thickness",
           options: {
             filter: true,
-            sort: false,
+            sort: true,
             customBodyRender: (value, tableMeta) => {
               const products_thickness = tableMeta.rowData[3];
               const products_unit = tableMeta.rowData[4];
@@ -88,7 +88,7 @@ const SelectProduct = ({ onSelect, itemIndex }) => {
           label: "Size",
           options: {
             filter: true,
-            sort: false,
+            sort: true,
             customBodyRender: (value, tableMeta) => {
               const products_size1 = tableMeta.rowData[5];
               const products_size2 = tableMeta.rowData[6];
@@ -115,7 +115,7 @@ const SelectProduct = ({ onSelect, itemIndex }) => {
   
         {
           name: "id",
-          label: "Action",
+          label: "ACTION",
           options: {
             filter: false,
             sort: false,
@@ -147,6 +147,15 @@ const SelectProduct = ({ onSelect, itemIndex }) => {
       download: false,
       print: false,
       filter: false,
+        textLabels: {
+                    body: {
+                      noMatch: loading ? (
+                        <CircularProgress />
+                      ) : (
+                        "Sorry, there is no matching data to display"
+                      ),
+                    },
+                  },
     };
   
     const data = useMemo(

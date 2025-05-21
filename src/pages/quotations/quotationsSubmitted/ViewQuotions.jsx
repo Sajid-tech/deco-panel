@@ -39,24 +39,27 @@ const ViewQuotions = () => {
       }
     };
     fetchViewOrder();
-    setLoading(false);
+  
   }, [1]);
+
 
   if (loading) {
     return (
+      <Layout>
       <div className="flex justify-center items-center h-56">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
+      </Layout>
     );
   }
 
   if (!viewQuotions) {
     return (
       <Layout>
-        <div className="flex justify-center flex-col mt-48 items-center h-56">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-          <div className="text-gray-400 animate-pulse">Loading</div>
-        </div>
+      <div className="flex justify-center flex-col mt-48 items-center h-56">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="text-gray-400 animate-pulse">Loading</div>
+      </div>
       </Layout>
     );
   }
@@ -66,13 +69,13 @@ const ViewQuotions = () => {
         <ReactToPrint
           trigger={() => (
             <button className=" bg-blue-500 text-white py-2 px-4 rounded mb-4">
-              Print Quotition
+              Print Quotation
             </button>
           )}
           content={() => printRef.current}
         />
 
-        <div ref={printRef} className="print-container">
+        <div ref={printRef} className="print-container ">
           <div className="grid grid-cols-3 gap-4 mb-6 border-b pb-4">
             <div>
               <p className="font-semibold text-black">Client:</p>
@@ -124,10 +127,12 @@ const ViewQuotions = () => {
                       {item.quotation_sub_quantity}
                     </td>
                     <td className="p-2 border border-black">
-                    {item.quotation_sub_rate.toFixed(2)}
+                    {/* {item.quotation_sub_rate.toFixed(2)} */}
+                    {(Number(item.quotation_sub_rate) || 0).toFixed(2)}
                     </td>
                     <td className="p-2 border border-black">
-                    {item.quotation_sub_amount.toFixed(2)}
+                    {/* {item.quotation_sub_amount.toFixed(2)} */}
+                    {(Number(item.quotation_sub_amount) || 0).toFixed(2)}
                     </td>
                   </tr>
                 ))}
@@ -138,13 +143,14 @@ const ViewQuotions = () => {
                   <td className="p-2 border border-black font-bold" >Total  </td>
 
                   <td className="p-2 border border-black font-semibold text-center" colSpan={3}>
-                  {quotationSubSum.toFixed(2)}
+                  {/* {quotationSubSum.toFixed(2)} */}
+                  {(Number(quotationSubSum) || 0).toFixed(2)}
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex flex-col  gap-4">
+          <div className="mt-4 flex flex-row  gap-4">
             <div className=" h-20 border border-black  bg-white  w-1/2  ">
               <span className=" opacity-50">Delevery Address</span>
             </div>

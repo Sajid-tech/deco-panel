@@ -8,6 +8,7 @@ import BASE_URL from '../../../base/BaseUrl';
 import { useNavigate } from 'react-router-dom';
 import { ContextPanel } from '../../../utils/ContextPanel';
 import toast from 'react-hot-toast';
+import { CircularProgress } from '@mui/material';
 
 const AppUserList = () => {
   const [userListData, setUserListData] = useState(null);
@@ -40,7 +41,7 @@ const AppUserList = () => {
       }
     };
     fetchUserListData();
-    setLoading(false);
+
   }, []);
 
   const handleUpdate = async (e, id) => {
@@ -96,7 +97,7 @@ const AppUserList = () => {
       label: "SL No",
       options: {
         filter: false,
-        sort: false,
+        sort: true,
         customBodyRender: (value, tableMeta) => {
           return tableMeta.rowIndex + 1;
         },
@@ -130,10 +131,10 @@ const AppUserList = () => {
 
     {
       name: "user_status",
-      label: "STATUS",
+      label: "Status",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     {
@@ -164,13 +165,22 @@ const AppUserList = () => {
     viewColumns: true,
     download: false,
     print: false,
+     textLabels: {
+              body: {
+                noMatch: loading ? (
+                  <CircularProgress />
+                ) : (
+                  "Sorry, there is no matching data to display"
+                ),
+              },
+            },
   };
   return (
     <Layout>
        <UserTeamFilter/>
-       <div className="mt-5">
+       <div className="mt-1">
         <MUIDataTable
-          title={"App User List"}
+          title={"App Users List"}
           data={userListData ? userListData : []}
           columns={columns}
           options={options}

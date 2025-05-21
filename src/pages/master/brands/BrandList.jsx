@@ -14,7 +14,7 @@ const BrandList = () => {
   const [loading, setLoading] = useState(false);
   const { isPanelUp } = useContext(ContextPanel);
   const navigate = useNavigate();
-
+  const usertype = localStorage.getItem("user_type_id");
   useEffect(() => {
     const fetchCountryData = async () => {
       try {
@@ -41,44 +41,64 @@ const BrandList = () => {
       }
     };
     fetchCountryData();
-    setLoading(false);
+  
   }, []);
 
   const columns = [
+    {
+      name: "brands_image",
+      label: "IMAGE",
+      options: {
+        filter: false,
+        sort: false,
+        customBodyRender: (brands_image) => {
+          return (
+            <img
+              src={
+                "https://decopanel.in/storage/app/public/allimages/" +
+                brands_image
+              }
+              className="media-object rounded-full w-14 h-14"
+              alt="Brand"
+            />
+          );
+        },
+      },
+    },
     {
       name: "brands_name",
       label: "Brand",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
+ 
     {
       name: "brands_status",
       label: "Status",
       options: {
-        filter: true,
-        sort: false,
+        filter: false,
+        sort: true,
         customBodyRender: (brands_status) => {
-          return brands_status === "Active" ? (
-            <Stack>
-              <Chip  className="md:w-[40%]"  label="Active" color="primary" />
-            </Stack>
-          ) : (
-            <Stack>
-              <Chip
-               className="md:w-[40%]"
-                sx={{  background: "yellow", color: "black" }}
-                label="Inactive"
-              />
-            </Stack>
+          return (
+            <div className="w-fit px-2 py-1 text-sm font-medium rounded-md 
+            text-center 
+              bg-blue-100 text-blue-800"
+              style={brands_status !== "Active" ? {
+                backgroundColor: "#fef08a", 
+                color: "#1c1917" 
+              } : {}}
+            >
+              {brands_status === "Active" ? "Active" : "Inactive"}
+            </div>
           );
         },
       },
     },
     {
       name: "id",
-      label: "Action",
+      label: "ACTION",
       options: {
         filter: false,
         sort: false,
@@ -103,46 +123,38 @@ const BrandList = () => {
     viewColumns: true,
     download: false,
     print: false,
-    setRowProps: (rowData) => {
-      return {
-        style: {
-          borderBottom: "10px solid #f1f7f9",
-        },
-      };
-    },
+    customToolbar: () => {
+         return (
+           <button
+             onClick={() => navigate("/add-brand")}
+             className={`btn btn-primary text-center md:text-right text-white bg-blue-600 hover:bg-blue-700 text-sm px-2 py-1 rounded shadow-md ${
+               usertype !== 1 ? "inline-block" : "hidden"
+             }`}
+           >
+             + Brand
+           </button>
+         );
+       },
+       textLabels: {
+         body: {
+           noMatch: loading ? (
+             <CircularProgress />
+           ) : (
+             "Sorry, there is no matching data to display"
+           ),
+         },
+       },
   };
-  const usertype = localStorage.getItem("user_type_id");
+  
 
   return (
     <Layout>
-      {loading && (
-        <CircularProgress
-          disableShrink
-          style={{
-            marginLeft: "600px",
-            marginTop: "300px",
-            marginBottom: "300px",
-          }}
-          color="secondary"
-        />
-      )}
+    
       <MasterFilter />
-      <div className="flex flex-col md:flex-row justify-between items-center bg-white mt-5 p-2 rounded-lg space-y-4 md:space-y-0">
-        <h3 className="text-center md:text-left text-lg md:text-xl font-bold">
-        BrandList
-        </h3>
-
-        <Link
-          to="/add-brand"
-          className="btn btn-primary text-center md:text-right text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-md"
-        >
-          <button className={usertype !== 1 ? "inline-block" : "hidden"}>
-            + Add New
-          </button>
-        </Link>
-      </div>
-      <div className="mt-5">
+    
+      <div className="mt-1">
         <MUIDataTable
+        title="Brand List"
           data={brandListData ? brandListData : []}
           columns={columns}
           options={options}

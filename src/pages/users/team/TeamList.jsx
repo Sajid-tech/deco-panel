@@ -8,6 +8,7 @@ import axios from 'axios';
 import BASE_URL from '../../../base/BaseUrl';
 import UserTeamFilter from '../../../components/UserTeamFilter';
 import MUIDataTable from 'mui-datatables';
+import { CircularProgress } from '@mui/material';
 
 const TeamList = () => {
   const [teamListData, setTeamListData] = useState(null);
@@ -39,8 +40,9 @@ const TeamList = () => {
         setLoading(false);
       }
     };
+
     fetchUserListData();
-    setLoading(false);
+
   }, []);
 
   const handleUpdate = async (e, id) => {
@@ -96,7 +98,7 @@ const TeamList = () => {
       label: "SL No",
       options: {
         filter: false,
-        sort: false,
+        sort: true,
         customBodyRender: (value, tableMeta) => {
           return tableMeta.rowIndex + 1;
         },
@@ -130,10 +132,10 @@ const TeamList = () => {
 
     {
       name: "user_status",
-      label: "STATUS",
+      label: "Status",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     {
@@ -164,11 +166,20 @@ const TeamList = () => {
     viewColumns: true,
     download: false,
     print: false,
+     textLabels: {
+              body: {
+                noMatch: loading ? (
+                  <CircularProgress />
+                ) : (
+                  "Sorry, there is no matching data to display"
+                ),
+              },
+            },
   };
   return (
     <Layout>
       <UserTeamFilter/>
-       <div className="mt-5">
+       <div className="mt-1">
         <MUIDataTable
           title={"Team List"}
           data={teamListData ? teamListData : []}

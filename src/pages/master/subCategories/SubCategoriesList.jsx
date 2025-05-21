@@ -14,6 +14,7 @@ const SubCategoriesList = () => {
   const [loading, setLoading] = useState(false);
   const { isPanelUp } = useContext(ContextPanel);
   const navigate = useNavigate();
+  const usertype = localStorage.getItem("user_type_id");
 
   useEffect(() => {
     const fetchCountryData = async () => {
@@ -41,15 +42,14 @@ const SubCategoriesList = () => {
       }
     };
     fetchCountryData();
-    setLoading(false);
   }, []);
 
   const columns = [
     {
       name: "product_sub_category_image",
-      label: " ",
+      label: "IMAGE",
       options: {
-        filter: true,
+        filter: false,
         sort: false,
         customBodyRender: (product_sub_category_image) => {
           return (
@@ -58,9 +58,7 @@ const SubCategoriesList = () => {
                 "https://decopanel.in/storage/app/public/product_category/" +
                 product_sub_category_image
               }
-              className="media-object rounded-circle"
-              width="75"
-              height="75"
+              className="media-object rounded-full w-14 h-14"
               alt="Product Category"
             />
           );
@@ -69,39 +67,44 @@ const SubCategoriesList = () => {
     },
     {
       name: "product_category",
-      label: "Caterogy",
+      label: "Category",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     {
       name: "product_sub_category",
-      label: "Sub Caterogy",
+      label: "Sub Category",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
+
     {
       name: "product_sub_category_status",
       label: "Status",
       options: {
-        filter: true,
-        sort: false,
+        filter: false,
+        sort: true,
         customBodyRender: (product_sub_category_status) => {
-          return product_sub_category_status === "Active" ? (
-            <Stack>
-              <Chip className="md:w-[40%]" label="Active" color="primary" />
-            </Stack>
-          ) : (
-            <Stack>
-              <Chip
-              className="md:w-[40%]"
-                sx={{ background: "yellow", color: "black" }}
-                label="Inactive"
-              />
-            </Stack>
+          return (
+            <div
+              className="w-fit px-2 py-1 text-sm font-medium rounded-md 
+            text-center 
+              bg-blue-100 text-blue-800"
+              style={
+                product_sub_category_status !== "Active"
+                  ? {
+                      backgroundColor: "#fef08a",
+                      color: "#1c1917",
+                    }
+                  : {}
+              }
+            >
+              {product_sub_category_status === "Active" ? "Active" : "Inactive"}
+            </div>
           );
         },
       },
@@ -109,7 +112,7 @@ const SubCategoriesList = () => {
 
     {
       name: "id",
-      label: "Action",
+      label: "ACTION",
       options: {
         filter: false,
         sort: false,
@@ -131,49 +134,39 @@ const SubCategoriesList = () => {
     selectableRows: "none",
     elevation: 0,
     responsive: "standard",
-    viewColumns: true,
+    viewColumns: false,
     download: false,
     print: false,
-    setRowProps: (rowData) => {
-      return {
-        style: {
-          borderBottom: "10px solid #f1f7f9",
-        },
-      };
+    customToolbar: () => {
+      return (
+        <button
+          onClick={() => navigate("/add-sub-categories")}
+          className={`btn btn-primary text-center md:text-right text-white bg-blue-600 hover:bg-blue-700 text-sm px-2 py-1 rounded shadow-md ${
+            usertype !== 1 ? "inline-block" : "hidden"
+          }`}
+        >
+          + Sub Category
+        </button>
+      );
+    },
+    textLabels: {
+      body: {
+        noMatch: loading ? (
+          <CircularProgress />
+        ) : (
+          "Sorry, there is no matching data to display"
+        ),
+      },
     },
   };
-  const usertype = localStorage.getItem("user_type_id");
 
   return (
     <Layout>
-      {loading && (
-        <CircularProgress
-          disableShrink
-          style={{
-            marginLeft: "600px",
-            marginTop: "300px",
-            marginBottom: "300px",
-          }}
-          color="secondary"
-        />
-      )}
       <MasterFilter />
-      <div className="flex flex-col md:flex-row justify-between items-center bg-white mt-5 p-2 rounded-lg space-y-4 md:space-y-0">
-        <h3 className="text-center md:text-left text-lg md:text-xl font-bold">
-        Sub  Categories List
-        </h3>
 
-        <Link
-          to="/add-sub-categories"
-          className="btn btn-primary text-center md:text-right text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-md"
-        >
-          <button className={usertype !== 1 ? "inline-block" : "hidden"}>
-            + Add New
-          </button>
-        </Link>
-      </div>
-      <div className="mt-5">
+      <div className="mt-1">
         <MUIDataTable
+          title=" Sub Categories List"
           data={subCategoriyListData ? subCategoriyListData : []}
           columns={columns}
           options={options}

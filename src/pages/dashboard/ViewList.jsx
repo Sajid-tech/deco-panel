@@ -39,9 +39,11 @@ const ViewList = () => {
 
   if (loading) {
     return (
+      <Layout>
       <div className="flex justify-center items-center h-56">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
+      </Layout>
     );
   }
 
@@ -57,7 +59,7 @@ const ViewList = () => {
   }
   return (
     <Layout>
-      <div className="p-4 md:p-6 max-w-4xl mx-auto mt-5">
+      <div className="p-4 md:p-6 max-w-4xl mx-auto mt-5 ">
         <ReactToPrint
           trigger={() => (
             <button className=" bg-blue-500 text-white py-2 px-4 rounded mb-4">
@@ -67,7 +69,7 @@ const ViewList = () => {
           content={() => printRef.current}
         />
 
-        <div ref={printRef} className="print-container">
+        <div ref={printRef} className="print-container ">
           <div className="grid grid-cols-3 gap-4 mb-6 border-b pb-4">
             <div>
               <p className="font-semibold text-black">Client:</p>
@@ -130,7 +132,7 @@ const ViewList = () => {
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex flex-col  gap-4">
+          <div className="mt-4 flex flex-row  gap-4">
             <div className=" h-20 border border-black  bg-white  w-1/2  ">
               <span className=" opacity-50">Delevery Address</span>
             </div>

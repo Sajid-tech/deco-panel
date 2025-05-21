@@ -11,6 +11,7 @@ import html2canvas from "html2canvas";
 import { IconButton } from '@material-tailwind/react';
 import { FaRegFilePdf } from 'react-icons/fa';
 import moment from 'moment';
+import { CircularProgress } from '@mui/material';
 
 const ReportQuotationDetails = () => {
     const [quotation, setQuotation] = useState(null);
@@ -52,7 +53,7 @@ const ReportQuotationDetails = () => {
         }
       };
       fetchReprotQuotation();
-      setLoading(false);
+    
     }, []);
   
     const handleSavePDF = () => {
@@ -85,7 +86,7 @@ const ReportQuotationDetails = () => {
         label: "Quotation Date",
         options: {
           filter: true,
-          sort: false,
+          sort: true,
           customBodyRender: (quotation_date) => {
             return moment(quotation_date).format("DD-MM-YYYY");
           }
@@ -105,7 +106,7 @@ const ReportQuotationDetails = () => {
         label: "Quotation No",
         options: {
           filter: true,
-          sort: false,
+          sort: true,
         },
       },
       {
@@ -113,7 +114,7 @@ const ReportQuotationDetails = () => {
         label: "Status",
         options: {
           filter: true,
-          sort: false,
+          sort: true,
         },
       },
       
@@ -140,18 +141,24 @@ const ReportQuotationDetails = () => {
           </IconButton>
         );
       },
+       textLabels: {
+                    body: {
+                      noMatch: loading ? (
+                        <CircularProgress />
+                      ) : (
+                        "Sorry, there is no matching data to display"
+                      ),
+                    },
+                  },
     };
   return (
     <Layout>
         <ReportFilter/>
-        <div className="flex flex-col md:flex-row justify-between items-center bg-white mt-5 p-2 rounded-lg space-y-4 md:space-y-0">
-        <h3 className="text-center md:text-left text-lg md:text-xl font-bold">
-          Quotation Details Report
-        </h3>
-      </div>
+     
 
-      <div className="mt-5" ref={tableRef}>
+      <div className="mt-1" ref={tableRef}>
         <MUIDataTable
+        title="Quotation Details Report"
           data={quotation ? quotation : []}
           columns={columns}
           options={options}

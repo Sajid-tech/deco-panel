@@ -1,8 +1,8 @@
 import axios from 'axios';
 import React, { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import BASE_URL from '../../base/BaseUrl';
-import { Button, IconButton, Tooltip } from '@mui/material';
+import { Button, CircularProgress, IconButton, Tooltip } from '@mui/material';
 import MUIDataTable from 'mui-datatables';
 import Layout from '../../layout/Layout';
 import CreateOrderFilter from '../../components/CreateOrderFilter';
@@ -13,7 +13,7 @@ const OrderList = () => {
     const [orderList, setOrderList] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-  
+   const {pathname} = useLocation()
     useEffect(() => {
       const fetchOrderList = async () => {
         try {
@@ -36,7 +36,7 @@ const OrderList = () => {
         }
       };
       fetchOrderList();
-      setLoading(false);
+     
     }, []);
   
     const handleCreateOrder = () => {
@@ -66,7 +66,7 @@ const OrderList = () => {
           label: "order no",
           options: {
             filter: true,
-            sort: false,
+            sort: true,
           },
         },
         {
@@ -74,7 +74,7 @@ const OrderList = () => {
           label: "user",
           options: {
             filter: true,
-            sort: false,
+            sort: true,
           },
         },
         {
@@ -82,13 +82,13 @@ const OrderList = () => {
           label: "Status",
           options: {
             filter: true,
-            sort: false,
+            sort: true,
           },
         },
   
         {
           name: "id",
-          label: "Action",
+          label: "ACTION",
           options: {
             filter: false,
             sort: false,
@@ -96,14 +96,10 @@ const OrderList = () => {
               return (
                 <div className="flex items-center space-x-2">
                   <Tooltip title="View" placement="top">
-                  <IconButton aria-label="View">
-                    <Link
-                      to={`/view-order/${id}`}
-                    >
-                      <Visibility />
-                    </Link>
-                  </IconButton>
-                </Tooltip>
+                              <IconButton aria-label="View" size="small">
+                                <Link to={`/view-order/${id}`}><Visibility fontSize="small"/></Link>
+                              </IconButton>
+                            </Tooltip>
                 </div>
               );
             },
@@ -116,29 +112,40 @@ const OrderList = () => {
     const options = {
       selectableRows: "none",
       elevation: 0,
-      rowsPerPage: 5,
-      rowsPerPageOptions: [5, 10, 25],
+      // rowsPerPage: 5,
+      // rowsPerPageOptions: [5, 10, 25],
       responsive: "standard",
       viewColumns: false,
       download: false,
       print: false,
+       textLabels: {
+                    body: {
+                      noMatch: loading ? (
+                        <CircularProgress />
+                      ) : (
+                        "Sorry, there is no matching data to display"
+                      ),
+                    },
+                  },
     };
     const data = useMemo(() => (orderList ? orderList : []), [orderList]);
   return (
     <Layout>
-          <CreateOrderFilter/>
+      {!pathname.includes("/order-list-nav") && (
+  <CreateOrderFilter />
+)}
   
-      <div className="mt-5">
+      <div className="mt-1">
       
 
-        <div className="bg-white mt-4 p-4 md:p-6 rounded-lg shadow-lg">
+       
           <MUIDataTable
-            title={"Order list"}
+            title={"Order List"}
             data={data}
             columns={columns}
             options={options}
           />
-        </div>
+        
       </div>
     </Layout>
   )

@@ -32,7 +32,7 @@ const EditSubCategory = () => {
   });
 
   const [selectedFile, setSelectedFile] = useState(null);
-
+  const [loading, setLoading] = useState(true);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [category, setCategory] = useState([]);
   useEffect(() => {
@@ -61,6 +61,7 @@ const EditSubCategory = () => {
           setSubCategory(res.data?.productSubCategory);
         });
     }, []);
+    
 
   useEffect(() => {
     axios
@@ -197,10 +198,11 @@ const EditSubCategory = () => {
 
                     <div>
                       <Input
-                        required
+                     
                         type="file"
                         label="Image"
-                        name="product_category_image"
+                        name="product_sub_category_image"
+                        required={!subcategory.product_sub_category_image} 
                         onChange={(e) => setSelectedFile(e.target.files[0])}
                       />
                     </div>

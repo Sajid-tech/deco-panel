@@ -169,7 +169,7 @@ const Home = () => {
             <div className="container mx-auto col-span-2">
               <div className="flex justify-between bg-white p-4 rounded-sm">
                 <div className="content-center">
-                  <h1>Tomorrow Booking Orders</h1>
+                  <h1>Recent Orders</h1>
                 </div>
                 <div className="flex gap-3">
                   <div>

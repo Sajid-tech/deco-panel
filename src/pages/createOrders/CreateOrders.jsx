@@ -1,65 +1,50 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Layout from "../../layout/Layout";
-import toast, { Toaster } from "react-hot-toast";
 import BASE_URL from "../../base/BaseUrl";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
-import { Button, TextField, MenuItem, IconButton } from "@mui/material";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogActions,
+  Button as MuiButton
+} from "@mui/material";
 import {
-  MdDelete as DeleteIcon,
-  MdArrowBack as BackIcon,
+  MdDelete,
+  MdAdd,
+  MdExpandMore,
+  MdExpandLess
 } from "react-icons/md";
-
-import { Dialog, DialogContent, DialogActions } from "@mui/material";
 import SelectProduct from "../../components/SelectProduct";
 import CreateOrderFilter from "../../components/CreateOrderFilter";
+import { toast } from "react-toastify";
+
 
 const CreateOrders = () => {
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useState({});
   const [editIndex, setEditIndex] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [dateyear, setDateYear] = useState("");
-  console.log(dateyear , "dateyear")
   const navigate = useNavigate();
-  var today = new Date();
-  var dd = String(today.getDate()).padStart(2, "0");
-  var mm = String(today.getMonth() + 1).padStart(2, "0");
-  var yyyy = today.getFullYear();
+   const quantityRefs = useRef([]);
+  // Get current date
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2, "0");
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const yyyy = today.getFullYear();
+  const todayBackendFormat = yyyy + "-" + mm + "-" + dd;
 
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await axios.get(
-          `${BASE_URL}/api/web-fetch-year`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        console.log(res)
-        setDateYear(res.data?.year?.current_year);
-      } catch (error) {
-        console.error("Error fetching services:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  today = mm + "/" + dd + "/" + yyyy;
-  var todayback = yyyy + "-" + mm + "-" + dd;
+  // Order state
   const [order, setOrder] = useState({
     orders_user_id: "",
-    orders_date: todayback,
+    orders_date: todayBackendFormat,
     orders_year: dateyear,
     orders_count: "",
     order_sub_data: "",
   });
+  
   const [order_sub_count, setCount] = useState(1);
   const [items, setItems] = useState([
     {
@@ -76,7 +61,22 @@ const CreateOrders = () => {
     },
   ]);
 
- 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/api/web-fetch-year`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setDateYear(res.data?.year?.current_year);
+      } catch (error) {
+        console.error("Error fetching services:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -89,7 +89,6 @@ const CreateOrders = () => {
           },
         });
         setProfileData(response.data.profile);
-        console.log("setprofile data", response.data.profile);
       } catch (error) {
         console.error("error while fetching select product ", error);
       } finally {
@@ -97,16 +96,10 @@ const CreateOrders = () => {
       }
     };
     fetchProfile();
-    setLoading(false);
-  }, [1]);
+  }, []);
 
-  const handleCreateOrder = () => {
-    navigate("/home");
-  };
-
-  const handleOrderList = () => {
-    navigate("/order-list");
-  };
+  const handleCreateOrder = () => navigate("/home");
+  const handleOrderList = () => navigate("/order-list");
 
   const onInputChange = (e) => {
     setOrder({ ...order, [e.target.name]: e.target.value });
@@ -156,7 +149,6 @@ const CreateOrders = () => {
     }));
   };
 
-  // modal
   const handleOpenDialog = (index) => {
     setEditIndex(index);
     setOpenDialog(true);
@@ -167,9 +159,6 @@ const CreateOrders = () => {
   };
 
   const handleSelectProduct = (product, index) => {
-    console.log("Selected product:", product);
-    console.log("Item index:", index);
-
     if (index !== null) {
       const updatedItems = [...items];
       updatedItems[index] = {
@@ -184,8 +173,12 @@ const CreateOrders = () => {
         orders_sub_size_unit: product.products_size_unit,
         orders_sub_quantity: "",
       };
-      console.log("Updated items:", updatedItems);
       setItems(updatedItems);
+      setTimeout(() => {
+        if (quantityRefs.current[index]) {
+          quantityRefs.current[index].focus();
+        }
+      }, 0);
     }
     handleCloseDialog();
   };
@@ -208,13 +201,13 @@ const CreateOrders = () => {
         },
       });
 
-      toast.success("Order Created");
+      toast.success("Order Created Successfully");
       setTimeout(() => {
         navigate("/order-list");
       }, 500);
     } catch (error) {
-      console.error("Error update on create order ", error);
-      toast.error("Error update on create order");
+      console.error("Error creating order", error);
+      toast.error("Error creating order");
     }
   };
 
@@ -229,306 +222,329 @@ const CreateOrders = () => {
   const isAddMoreDisabled = () => {
     return items.some((item) => item.orders_sub_product_id === "");
   };
+
   return (
     <Layout>
-       <Toaster
-        toastOptions={{
-          success: {
-            style: {
-              background: "white",
-            },
-          },
-          error: {
-            style: {
-              background: "red",
-            },
-          },
-        }}
-        position="top-right"
-        reverseOrder={false}
-      />
-       <CreateOrderFilter/>
-     
-      <div className="mt-5 ">
-       
-
-        <div className="bg-white mt-4 p-4 md:p-6 rounded-lg shadow-lg">
+    
+        <CreateOrderFilter />
+        
+        <div className="bg-white rounded-lg shadow-sm p-6 mt-1">
+          <h1 className="text-xl font-medium mb-4">Create New Order</h1>
+          
           <form id="addIndiv" autoComplete="off">
-            <div className="flex flex-col lg:flex-row gap-4 mb-6">
-              <TextField
-                fullWidth
-                label="User"
-                select
-                name="orders_user_id"
-                onChange={onInputChange}
-                required
-              >
-                {profileData && profileData.length > 0 ? (
-                  profileData.map((source) => (
-                    <MenuItem key={source.id} value={source.id}>
-                      {source.full_name}
-                    </MenuItem>
-                  ))
-                ) : (
-                  <MenuItem disabled>No profiles available</MenuItem>
-                )}
-              </TextField>
-
-              <TextField
-                fullWidth
-                type="date"
-                label="Date"
-                name="orders_date"
-                value={order.orders_date}
-                onChange={onInputChange}
-                required
-                InputLabelProps={{ shrink: true }}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">User</label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  name="orders_user_id"
+                  onChange={onInputChange}
+                  required
+                >
+                  <option value="">Select User</option>
+                  {profileData && profileData.length > 0 ? (
+                    profileData.map((source) => (
+                      <option key={source.id} value={source.id}>
+                        {source.full_name}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>No profiles available</option>
+                  )}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <input
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  type="date"
+                  name="orders_date"
+                  value={order.orders_date}
+                  onChange={onInputChange}
+                  required
+                />
+              </div>
             </div>
-            <hr />
-
-            {/* Mobile View */}
-            <div className="block md:hidden">
-              <div className="flex flex-col gap-4">
-                {items.map((item, index) => (
-                  <div
-                    key={index}
-                    className="bg-white p-4 rounded-lg shadow-lg mb-4"
-                  >
-                    <TextField
-                      fullWidth
-                      label="Products"
-                      name="orders_sub_product_id"
-                      value={item.orders_sub_product_id}
-                      onClick={() => handleOpenDialog(index)}
-                      onChange={(e) => onChange(e, index)}
-                      InputProps={{ style: { border: "none" } }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Quantity"
-                      required
-                      name="orders_sub_quantity"
-                      value={item.orders_sub_quantity}
-                      onChange={(e) => onChange(e, index)}
-                      InputProps={{ style: { border: "none" } }}
-                    />
-                    <IconButton onClick={() => removeItem(index)}>
-                      <DeleteIcon />
-                    </IconButton>
-
-                    {/* Toggle Button for Each Item */}
-                    <Button
-                      className="mb-4"
-                      color="primary"
-                      variant="outlined"
+            
+            <div className="border-t border-gray-200 my-2"></div>
+            
+            <h2 className="text-lg font-medium mb-2">Order Items</h2>
+            
+            {/* Order Items List */}
+            {items.map((item, index) => (
+              <div key={index} className="bg-white border border-gray-200 rounded-lg shadow-sm mb-4 overflow-hidden hover:shadow-md transition-shadow duration-300">
+                <div className="p-1">
+                  {/* Mobile View */}
+                  <div className="md:hidden">
+                    <div className="flex gap-1 mb-3">
+                      <input
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 cursor-pointer"
+                        placeholder="Select Product"
+                        readOnly
+                        value={item.orders_sub_product_id ? item.orders_sub_product_id : ""}
+                        onClick={() => handleOpenDialog(index)}
+                      />
+                      
+                      <button 
+                        type="button"
+                        onClick={() => removeItem(index)} 
+                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
+                      >
+                        <MdDelete />
+                      </button>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <input
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Quantity"
+                        required
+                        name="orders_sub_quantity"
+                        value={item.orders_sub_quantity}
+                        onChange={(e) => onChange(e, index)}
+                        ref={(el) => (quantityRefs.current[index] = el)}
+                      />
+                    </div>
+                    
+                    <button
+                      type="button"
+                      className="w-full flex items-center justify-center gap-1 py-2 px-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                       onClick={() => toggleDetails(index)}
-                      style={{ width: "100%" }}
                     >
-                      {showDetails[index] ? "Close Details" : "Other Details"}
-                    </Button>
-
-                    {/* Details for Each Item */}
+                      {showDetails[index] ? "Hide Details" : "Show Details"}
+                      {showDetails[index] ? <MdExpandLess className="text-lg" /> : <MdExpandMore className="text-lg" />}
+                    </button>
+                    
                     {showDetails[index] && (
-                      <div className="p-6">
-                        <TextField
-                          fullWidth
-                          label="Category"
-                          name="orders_sub_catg_id"
-                          value={item.orders_sub_catg_id}
-                          disabled
-                          InputProps={{ style: { border: "none" } }}
-                        />
-                        <TextField
-                          fullWidth
-                          label="Sub Category"
-                          name="orders_sub_sub_catg_id"
-                          value={item.orders_sub_sub_catg_id}
-                          disabled
-                          InputProps={{ style: { border: "none" } }}
-                        />
-                        <TextField
-                          fullWidth
-                          label="Brand"
-                          name="orders_sub_brand"
-                          value={item.orders_sub_brand}
-                          disabled
-                          InputProps={{ style: { border: "none" } }}
-                        />
-                        <TextField
-                          fullWidth
-                          label="Thickness"
-                          name="orders_sub_thickness"
-                          value={item.orders_sub_thickness}
-                          disabled
-                          InputProps={{ style: { border: "none" } }}
-                        />
-                        <TextField
-                          fullWidth
-                          label="Unit"
-                          name="orders_sub_unit"
-                          value={item.orders_sub_unit}
-                          disabled
-                          InputProps={{ style: { border: "none" } }}
-                        />
-                        <TextField
-                          fullWidth
-                          label="Length"
-                          name="orders_sub_size1"
-                          value={item.orders_sub_size1}
-                          disabled
-                          InputProps={{ style: { border: "none" } }}
-                        />
-                        <TextField
-                          fullWidth
-                          label="Breadth"
-                          name="orders_sub_size2"
-                          value={item.orders_sub_size2}
-                          disabled
-                          InputProps={{ style: { border: "none" } }}
-                        />
-                        <TextField
-                          fullWidth
-                          label="Size Unit"
-                          name="orders_sub_size_unit"
-                          value={item.orders_sub_size_unit}
-                          disabled
-                          InputProps={{ style: { border: "none" } }}
-                        />
+                      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Category</label>
+                          <input
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                            value={item.orders_sub_catg_id || ""}
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Sub Category</label>
+                          <input
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                            value={item.orders_sub_sub_catg_id || ""}
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Brand</label>
+                          <input
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                            value={item.orders_sub_brand || ""}
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Thickness</label>
+                          <input
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                            value={item.orders_sub_thickness || ""}
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Unit</label>
+                          <input
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                            value={item.orders_sub_unit || ""}
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Length</label>
+                          <input
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                            value={item.orders_sub_size1 || ""}
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Breadth</label>
+                          <input
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                            value={item.orders_sub_size2 || ""}
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Size Unit</label>
+                          <input
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                            value={item.orders_sub_size_unit || ""}
+                            disabled
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* //larger viwe  */}
-            <div className="hidden md:block p-6">
-              <div className="flex flex-col gap-4">
-                {items.map((item, index) => (
-                  <div key={index} className="flex flex-col lg:flex-row gap-4">
-                    <TextField
-                      fullWidth
-                      label="Products"
-                      name="orders_sub_product_id"
-                      onClick={() => handleOpenDialog(index)}
-                      value={item.orders_sub_product_id}
-                      onChange={(e) => onChange(e, index)}
-                      InputProps={{ style: { border: "none" } }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Category"
-                      name="orders_sub_catg_id"
-                      value={item.orders_sub_catg_id}
-                      disabled
-                      InputProps={{ style: { border: "none" } }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Sub Category"
-                      name="orders_sub_sub_catg_id"
-                      value={item.orders_sub_sub_catg_id}
-                      disabled
-                      InputProps={{ style: { border: "none" } }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Brand"
-                      name="orders_sub_brand"
-                      value={item.orders_sub_brand}
-                      disabled
-                      InputProps={{ style: { border: "none" } }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Thickness"
-                      name="orders_sub_thickness"
-                      value={item.orders_sub_thickness}
-                      disabled
-                      InputProps={{ style: { border: "none" } }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Unit"
-                      name="orders_sub_unit"
-                      value={item.orders_sub_unit}
-                      disabled
-                      InputProps={{ style: { border: "none" } }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Length"
-                      name="orders_sub_size1"
-                      value={item.orders_sub_size1}
-                      disabled
-                      InputProps={{ style: { border: "none" } }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Breadth"
-                      name="orders_sub_size2"
-                      value={item.orders_sub_size2}
-                      disabled
-                      InputProps={{ style: { border: "none" } }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Size Unit"
-                      name="orders_sub_size_unit"
-                      value={item.orders_sub_size_unit}
-                      disabled
-                      InputProps={{ style: { border: "none" } }}
-                    />
-                    <TextField
-                      fullWidth
-                      required
-                      label="Quantity"
-                      name="orders_sub_quantity"
-                      value={item.orders_sub_quantity}
-                      onChange={(e) => onChange(e, index)}
-                      InputProps={{ style: { border: "none" } }}
-                    />
-                    <IconButton onClick={() => removeItem(index)}>
-                      <DeleteIcon />
-                    </IconButton>
+                  
+                  {/* Desktop View */}
+                  <div className="hidden md:block">
+                    <div className="grid grid-cols-12 gap-3 items-center">
+                      <div className="col-span-2">
+                        <input
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 cursor-pointer"
+                          placeholder="Select Product"
+                          readOnly
+                          value={item.orders_sub_product_id ? item.orders_sub_product_id : ""}
+                          onClick={() => handleOpenDialog(index)}
+                        />
+                      </div>
+                      
+                      <div className="col-span-1">
+                        <input
+                          className="w-full px-2 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                          placeholder="Category"
+                          value={item.orders_sub_catg_id || ""}
+                          disabled
+                        />
+                      </div>
+                      
+                      <div className="col-span-1">
+                        <input
+                          className="w-full px-2 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                          placeholder="Sub Category"
+                          value={item.orders_sub_sub_catg_id || ""}
+                          disabled
+                        />
+                      </div>
+                      
+                      <div className="col-span-1">
+                        <input
+                          className="w-full px-2 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                          placeholder="Brand"
+                          value={item.orders_sub_brand || ""}
+                          disabled
+                        />
+                      </div>
+                      
+                      <div className="col-span-1">
+                        <input
+                          className="w-full px-2 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                          placeholder="Thickness"
+                          value={item.orders_sub_thickness || ""}
+                          disabled
+                        />
+                      </div>
+                      
+                      <div className="col-span-1">
+                        <input
+                          className="w-full px-2 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                          placeholder="Unit"
+                          value={item.orders_sub_unit || ""}
+                          disabled
+                        />
+                      </div>
+                      
+                      <div className="col-span-1">
+                        <input
+                          className="w-full px-2 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                          placeholder="Length"
+                          value={item.orders_sub_size1 || ""}
+                          disabled
+                        />
+                      </div>
+                      
+                      <div className="col-span-1">
+                        <input
+                          className="w-full px-2 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                          placeholder="Breadth"
+                          value={item.orders_sub_size2 || ""}
+                          disabled
+                        />
+                      </div>
+                      
+                      <div className="col-span-1">
+                        <input
+                          className="w-full px-2 py-2 border border-gray-200 rounded-lg bg-gray-50"
+                          placeholder="Size Unit"
+                          value={item.orders_sub_size_unit || ""}
+                          disabled
+                        />
+                      </div>
+                      
+                      <div className="col-span-1">
+                        <input
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Quantity"
+                          required
+                          name="orders_sub_quantity"
+                          value={item.orders_sub_quantity}
+                          onChange={(e) => onChange(e, index)}
+                          ref={(el) => (quantityRefs.current[index] = el)}
+                        />
+                      </div>
+                      
+                      <div className="col-span-1">
+                        <button 
+                          type="button"
+                          onClick={() => removeItem(index)} 
+                          className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
+                        >
+                          <MdDelete />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row justify-between mt-6 gap-4">
-              <Button
-                variant="contained"
-                color="primary"
+            ))}
+            
+            <div className="flex justify-between mt-6">
+              <button
+                type="button"
+                className={`flex items-center gap-1 px-4 py-2 rounded-lg font-medium 
+                  ${isAddMoreDisabled() 
+                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                    : 'bg-blue-600 text-white hover:bg-blue-700 transition-colors'}`}
                 onClick={addItem}
                 disabled={isAddMoreDisabled()}
               >
-                Add More
-              </Button>
-              <div className="flex flex-col md:flex-row gap-2">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  disabled={!isFormValid()}
-                  onClick={onSumbit}
-                >
-                  Submit
-                </Button>
-              </div>
+                <MdAdd /> Add Item
+              </button>
+              
+              <button
+                type="submit"
+                className={`px-5 py-2 rounded-lg font-medium min-w-[120px]
+                  ${!isFormValid() 
+                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                    : 'bg-blue-600 text-white hover:bg-blue-700 transition-colors'}`}
+                disabled={!isFormValid()}
+                onClick={onSumbit}
+              >
+                Submit Order
+              </button>
             </div>
           </form>
         </div>
-      </div>
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
+     
+      
+      {/* Product Selection Dialog - Keep MUI for Dialog */}
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogContent>
           <SelectProduct itemIndex={editIndex} onSelect={handleSelectProduct} />
         </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" color="error" onClick={handleCloseDialog}>
+        <DialogActions sx={{ p: 2 }}>
+          <MuiButton 
+            variant="outlined" 
+            color="error" 
+            onClick={handleCloseDialog}
+          >
             Cancel
-          </Button>
+          </MuiButton>
         </DialogActions>
       </Dialog>
     </Layout>

@@ -10,9 +10,9 @@ import MasterFilter from "../../../components/MasterFilter";
 import { Chip, CircularProgress, IconButton, Stack, Tooltip } from "@mui/material";
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import { Edit, Visibility } from "@mui/icons-material";
-import QuotationsFilter from "../../../components/quotationsFilter";
 import toast from "react-hot-toast";
 import moment from "moment";
+import QuotationsFilter from "../../../components/QuotationsFilter";
 
 const AllQuotationsList = () => {
   const [brandListData, setBrandListData] = useState(null);
@@ -46,7 +46,7 @@ const AllQuotationsList = () => {
       }
     };
     fetchCountryData();
-    setLoading(false);
+   
   }, []);
 
 
@@ -59,7 +59,7 @@ const AllQuotationsList = () => {
       label: "Quotation Date",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
         customBodyRender: (quotation_date) => {
           return moment(quotation_date).format("DD-MM-YYYY");
         }
@@ -70,7 +70,7 @@ const AllQuotationsList = () => {
       label: "Quotation No",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     {
@@ -78,51 +78,79 @@ const AllQuotationsList = () => {
       label: "User",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
+    // {
+    //   name: "quotation_status",
+    //   label: "Status",
+    //   options: {
+    //     filter: true,
+    //     sort: false,
+    //     customBodyRender: (quotation_status) => {
+    //       return quotation_status === "Quotation" ? (
+    //         <Stack>
+    //           <Chip className="md:w-[40%]" label="Quotation" color="primary" />
+    //         </Stack>
+    //       ) : quotation_status === "Cancel" ? (
+    //         <Stack>
+    //           <Chip
+    //             className="md:w-[40%]"
+    //             sx={{ background: "yellow", color: "black" }}
+    //             label="Cancel"
+    //           />
+    //         </Stack>
+    //       ) : (
+    //         <Stack>
+    //           <Chip
+    //             className="md:w-[40%]"
+    //             sx={{ background: "lightblue", color: "black" }}
+    //             label="Processing"
+    //           />
+    //         </Stack>
+    //       );
+    //     },
+        
+    //   },
+    // },
     {
       name: "quotation_status",
       label: "Status",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
         customBodyRender: (quotation_status) => {
-          return quotation_status === "Quotation" ? (
-            <Stack>
-              <Chip className="md:w-[40%]" label="Quotation" color="primary" />
-            </Stack>
-          ) : quotation_status === "Cancel" ? (
-            <Stack>
-              <Chip
-                className="md:w-[40%]"
-                sx={{ background: "yellow", color: "black" }}
-                label="Cancel"
-              />
-            </Stack>
-          ) : (
-            <Stack>
-              <Chip
-                className="md:w-[40%]"
-                sx={{ background: "lightblue", color: "black" }}
-                label="Processing"
-              />
-            </Stack>
+          let bgColor = "";
+          let textColor = "text-black";
+    
+          if (quotation_status === "Quotation") {
+            bgColor = "bg-blue-100 text-blue-800";
+          } else if (quotation_status === "Cancel") {
+            bgColor = "bg-yellow-200 text-black";
+          } else {
+            // Processing
+            bgColor = "bg-red-200 text-black";
+          }
+    
+          return (
+            <div className={`w-fit px-2 py-1 text-sm font-medium rounded-md text-center  ${bgColor} ${textColor}`}>
+              {quotation_status}
+            </div>
           );
         },
-        
       },
     },
+    
     {
       name: "id",
-      label: "View",
+      label: "VIEW",
       options: {
         filter: false,
         sort: false,
         customBodyRender: (id) => {
           return (
             <div className="flex items-center space-x-2">
-                <Tooltip title="View" placement="top">
+                {/* <Tooltip title="View" placement="top">
                   <IconButton aria-label="View">
                     <Link
                       to={`/view-quotions/${id}`}
@@ -130,7 +158,12 @@ const AllQuotationsList = () => {
                       <Visibility />
                     </Link>
                   </IconButton>
-                </Tooltip>
+                </Tooltip> */}
+                <Tooltip title="View" placement="top">
+            <IconButton aria-label="View" size="small">
+              <Link to={`/view-quotions/${id}`}><Visibility fontSize="small" /></Link>
+            </IconButton>
+          </Tooltip>
             </div>
           );
         },
@@ -144,39 +177,25 @@ const AllQuotationsList = () => {
     viewColumns: true,
     download: false,
     print: false,
-    setRowProps: (rowData) => {
-      return {
-        style: {
-          borderBottom: "10px solid #f1f7f9",
-        },
-      };
-    },
+     textLabels: {
+                  body: {
+                    noMatch: loading ? (
+                      <CircularProgress />
+                    ) : (
+                      "Sorry, there is no matching data to display"
+                    ),
+                  },
+                },
   };
-  const usertype = localStorage.getItem("user_type_id");
 
   return (
     <Layout>
-      {loading && (
-        <CircularProgress
-          disableShrink
-          style={{
-            marginLeft: "600px",
-            marginTop: "300px",
-            marginBottom: "300px",
-          }}
-          color="secondary"
-        />
-      )}
+    
       <QuotationsFilter />
-      <div className="flex flex-col md:flex-row justify-between items-center bg-white mt-5 p-2 rounded-lg space-y-4 md:space-y-0">
-        <h3 className="text-center md:text-left text-lg md:text-xl font-bold">
-        All Quotations List
-        </h3>
-
-       
-      </div>
-      <div className="mt-5">
+     
+      <div className="mt-1">
         <MUIDataTable
+        title="        All Quotation List"
           data={brandListData ? brandListData : []}
           columns={columns}
           options={options}

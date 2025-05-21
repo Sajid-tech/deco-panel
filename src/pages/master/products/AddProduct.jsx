@@ -56,12 +56,13 @@ const AddProduct = () => {
     products_size2: "",
     products_size_unit: "",
     products_rate: "",
+    products_image:"",
   });
 
 
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-
+  const [selectedFile, setSelectedFile] = useState(null);
   const [showmodal, setShowmodal] = useState(false);
   const closegroupModal = () => {
     setShowmodal(false);
@@ -100,7 +101,11 @@ const AddProduct = () => {
       return false;
     }
   };
-
+  const validateOnlyNumberOrDecimal = (inputtxt) => {
+   
+    const regex = /^\d*\.?\d{0,2}$/;
+    return regex.test(inputtxt);
+  };
   const onInputChange = (e) => {
     if (e.target.name == "products_thickness") {
       if (validateOnlyDigits(e.target.value)) {
@@ -124,7 +129,7 @@ const AddProduct = () => {
         });
       }
     } else if (e.target.name == "products_rate") {
-      if (validateOnlyDigits(e.target.value)) {
+      if (validateOnlyNumberOrDecimal(e.target.value)) {
         setProduct({
           ...product,
           [e.target.name]: e.target.value,
@@ -253,17 +258,29 @@ const AddProduct = () => {
       return;
     }
     setIsButtonDisabled(true);
-    const formData = {
-      products_catg_id: product.products_catg_id,
-      products_sub_catg_id: product.products_sub_catg_id,
-      products_brand: product.products_brand,
-      products_size1: product.products_size1,
-      products_thickness: product.products_thickness,
-      products_unit: product.products_unit,
-      products_size2: product.products_size2,
-      products_size_unit: product.products_size_unit,
-      products_rate: product.products_rate,
-    };
+    const formData = new FormData();
+    // const formData = {
+    //   products_catg_id: product.products_catg_id,
+    //   products_sub_catg_id: product.products_sub_catg_id,
+    //   products_brand: product.products_brand,
+    //   products_size1: product.products_size1,
+    //   products_thickness: product.products_thickness,
+    //   products_unit: product.products_unit,
+    //   products_size2: product.products_size2,
+    //   products_size_unit: product.products_size_unit,
+    //   products_rate: product.products_rate,
+    // };
+    formData.append("products_catg_id", product.products_catg_id);
+    formData.append("products_sub_catg_id", product.products_sub_catg_id);
+    formData.append("products_brand", product.products_brand);
+    formData.append("products_size1", product.products_size1);
+    formData.append("products_thickness", product.products_thickness);
+    formData.append("products_unit", product.products_unit);
+    formData.append("products_size2", product.products_size2);
+    formData.append("products_size_unit", product.products_size_unit);
+    formData.append("products_rate", product.products_rate);
+  
+    formData.append("products_image", selectedFile);
     try {
       const response = await axios.post(
         `${BASE_URL}/api/web-create-product`,
@@ -276,15 +293,15 @@ const AddProduct = () => {
       );
 
       if (response.data.code == 200) {
-        toast.success("Product Added Successfully");
+        toast.success(response.data.msg);
         navigate("/products");
       } else {
         if (response.data.code == 401) {
-          toast.error("Product Duplicate Entry");
+          toast.error(response.data.msg);
         } else if (response.data.code == 402) {
-          toast.error("Product Duplicate Entry");
+          toast.error(response.data.msg);
         } else {
-          toast.error("An unknown error occurred");
+          toast.error(response.data.msg);
         }
       }
     } catch (error) {
@@ -422,6 +439,7 @@ const AddProduct = () => {
               <div className="form-group ">
                 <Input
                   label="Rate"
+                  required
                   autoComplete="Name"
                   name="products_rate"
                   value={product.products_rate}
@@ -429,6 +447,15 @@ const AddProduct = () => {
                 />
                
               </div>
+               <div>
+                              <Input
+                                required
+                                type="file"
+                                label="Product Image"
+                                name="products_image"
+                                onChange={(e) => setSelectedFile(e.target.files[0])}
+                              />
+                            </div>
             </div>
             <div className="mt-4 text-center">
               <button

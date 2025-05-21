@@ -51,6 +51,7 @@ const AppProvider = ({ children }) => {
           "/pending-order-list",
           "/order-report",
           "/edit-order",
+          "/order-list-nav",
           "/product-report",
           "/order-view-report",
           "/quotation-view-report",

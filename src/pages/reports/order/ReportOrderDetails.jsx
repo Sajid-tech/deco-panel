@@ -11,6 +11,7 @@ import { IconButton } from "@material-tailwind/react";
 import { FaRegFilePdf } from "react-icons/fa";
 import MUIDataTable from "mui-datatables";
 import moment from "moment";
+import { CircularProgress } from "@mui/material";
 
 const ReportOrderDetails = () => {
   const [orderData, setOrder] = useState(null);
@@ -52,7 +53,7 @@ const ReportOrderDetails = () => {
       }
     };
     fetchReprotOrder();
-    setLoading(false);
+  
   }, []);
 
   const handleSavePDF = () => {
@@ -85,7 +86,7 @@ const ReportOrderDetails = () => {
       label: "Order Date",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
         customBodyRender: (orders_date) => {
           return moment(orders_date).format("DD-MM-YYYY");
         }
@@ -105,7 +106,7 @@ const ReportOrderDetails = () => {
       label: "Order No",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     {
@@ -113,7 +114,7 @@ const ReportOrderDetails = () => {
       label: "Status",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
   ];
@@ -139,18 +140,24 @@ const ReportOrderDetails = () => {
         </IconButton>
       );
     },
+                textLabels: {
+                  body: {
+                    noMatch: loading ? (
+                      <CircularProgress />
+                    ) : (
+                      "Sorry, there is no matching data to display"
+                    ),
+                  },
+                },
   };
   return (
     <Layout>
       <ReportFilter />
-      <div className="flex flex-col md:flex-row justify-between items-center bg-white mt-5 p-2 rounded-lg space-y-4 md:space-y-0">
-        <h3 className="text-center md:text-left text-lg md:text-xl font-bold">
-          Order Details Report
-        </h3>
-      </div>
+     
 
-      <div className="mt-5" ref={tableRef}>
+      <div className="mt-1" ref={tableRef}>
         <MUIDataTable
+        title=" Order Details Report"
           data={orderData ? orderData : []}
           columns={columns}
           options={options}

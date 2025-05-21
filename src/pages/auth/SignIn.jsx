@@ -43,10 +43,12 @@ const SignIn = () => {
         const user_type = res.data.UserInfo?.user.user_type;
         const id = res.data.UserInfo?.user.user_type;
         const username = res.data.UserInfo?.user.name;
-        console.log(username , "username")
+        const email = res.data.UserInfo?.user.email;
+   
         localStorage.setItem("user_type_id", user_type);
         localStorage.setItem("id", id);
         localStorage.setItem("username", username);
+        localStorage.setItem("email", email);
         if (token) {
           // Store the token in localStorage
           localStorage.setItem("token", token);
@@ -86,7 +88,7 @@ const SignIn = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold">
-                Deco Panel
+                Deco Panel  
               </h1>
             </div>
 

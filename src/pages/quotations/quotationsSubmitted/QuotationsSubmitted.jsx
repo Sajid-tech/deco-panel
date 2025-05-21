@@ -16,9 +16,9 @@ import {
 } from "@mui/material";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import { Edit, Visibility } from "@mui/icons-material";
-import QuotationsFilter from "../../../components/quotationsFilter";
 import moment from "moment";
 import { toast } from "react-toastify";
+import QuotationsFilter from "../../../components/QuotationsFilter";
 
 const QuotationsSubmittedList = () => {
   const [brandListData, setBrandListData] = useState(null);
@@ -52,7 +52,6 @@ const QuotationsSubmittedList = () => {
       }
     };
     fetchCountryData();
-    setLoading(false);
   }, []);
 
   const QuotationProceed = (e, value) => {
@@ -64,12 +63,12 @@ const QuotationsSubmittedList = () => {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     }).then((res) => {
-      if(res.data.code == 200){
+      if (res.data.code == 200) {
         toast.success("Quotation Updated Sucessfully");
         setBrandListData(res.data.quotation);
       } else {
         toast.error("Failed to convert Quotation ");
-       }
+      }
     });
   };
 
@@ -79,10 +78,10 @@ const QuotationsSubmittedList = () => {
       label: "Quotation Date",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
         customBodyRender: (quotation_date) => {
           return moment(quotation_date).format("DD-MM-YYYY");
-        }
+        },
       },
     },
     {
@@ -90,7 +89,7 @@ const QuotationsSubmittedList = () => {
       label: "Quotation No",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     {
@@ -98,91 +97,102 @@ const QuotationsSubmittedList = () => {
       label: "User",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
+    // {
+    //   name: "quotation_status",
+    //   label: "Status",
+    //   options: {
+    //     filter: true,
+    //     sort: false,
+    //     customBodyRender: (quotation_status) => {
+    //       return quotation_status === "Quotation" ? (
+    //         <Stack>
+    //           <Chip className="md:w-[45%]" label="Quotation" color="primary" />
+    //         </Stack>
+    //       ) : quotation_status === "Cancel" ? (
+    //         <Stack>
+    //           <Chip
+    //             className="md:w-[40%]"
+    //             sx={{ background: "yellow", color: "black" }}
+    //             label="Cancel"
+    //           />
+    //         </Stack>
+    //       ) : (
+    //         <Stack>
+    //           <Chip
+    //             className="md:w-[40%]"
+    //             sx={{ background: "lightblue", color: "black" }}
+    //             label="Processing"
+    //           />
+    //         </Stack>
+    //       );
+    //     },
+
+    //   },
+    // },
     {
       name: "quotation_status",
       label: "Status",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
         customBodyRender: (quotation_status) => {
-          return quotation_status === "Quotation" ? (
-            <Stack>
-              <Chip className="md:w-[45%]" label="Quotation" color="primary" />
-            </Stack>
-          ) : quotation_status === "Cancel" ? (
-            <Stack>
-              <Chip
-                className="md:w-[40%]"
-                sx={{ background: "yellow", color: "black" }}
-                label="Cancel"
-              />
-            </Stack>
-          ) : (
-            <Stack>
-              <Chip
-                className="md:w-[40%]"
-                sx={{ background: "lightblue", color: "black" }}
-                label="Processing"
-              />
-            </Stack>
-          );
-        },
-        
-      },
-    },
-    {
-      name: "id",
-      label: "Action",
-      options: {
-        filter: false,
-        sort: false,
-        customBodyRender: (id) => {
+          let bgColor = "";
+          let textColor = "text-black";
+
+          if (quotation_status === "Quotation") {
+            bgColor = "bg-blue-100 text-blue-800";
+          } else if (quotation_status === "Cancel") {
+            bgColor = "bg-yellow-200 text-black";
+          } else {
+            // Processing
+            bgColor = "bg-red-200 text-black";
+          }
+
           return (
-            <div className="flex items-center space-x-2">
-              <Tooltip title="Edit" placement="top">
-                <IconButton
-                  aria-label="Edit"
-                  style={{
-                    display:
-                      localStorage.getItem("user_type_id") == 1 ? "none" : "",
-                  }}
-                >
-                  <Link to={`/edit-quotations/${id}`}>
-                    <Edit />
-                  </Link>
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Processing Quotation" placement="top">
-                <IconButton
-                  aria-label="Processing Quotation"
-                  style={{
-                    display:
-                      localStorage.getItem("user_type_id") == 1 ? "none" : "",
-                  }}
-                >
-                  <a
-                    style={{ color: "rgba(13, 126, 247, 0.54)" }}
-                    onClick={(e) => QuotationProceed(e, id)}
-                  >
-                    <ConfirmationNumberIcon />
-                  </a>
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="View" placement="top">
-                <IconButton aria-label="View">
-                  <Link to={`/view-quotions/${id}`}>
-                    <Visibility />
-                  </Link>
-                </IconButton>
-              </Tooltip>
+            <div
+              className={`w-fit px-2 py-1 text-sm font-medium rounded-md text-center  ${bgColor} ${textColor}`}
+            >
+              {quotation_status}
             </div>
           );
         },
       },
     },
+    {
+      name: "id",
+      label: "ACTION",
+      options: {
+        filter: false,
+        sort: false,
+        customBodyRender: (id) => (
+          <div className="flex items-center space-x-1">
+            {localStorage.getItem("user_type_id") != 1 && (
+              <>
+                <Tooltip title="Edit" placement="top">
+                  <IconButton aria-label="Edit" size="small">
+                    <Link to={`/edit-quotations/${id}`}><Edit fontSize="small" /></Link>
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Processing Quotation" placement="top">
+                  <IconButton aria-label="Processing Quotation" size="small" onClick={(e) => QuotationProceed(e, id)}>
+                    <ConfirmationNumberIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </>
+            )}
+            <Tooltip title="View" placement="top">
+              <IconButton aria-label="View" size="small">
+                <Link to={`/view-quotions/${id}`}><Visibility fontSize="small" /></Link>
+              </IconButton>
+            </Tooltip>
+          </div>
+        ),
+      },
+    }
+    
   ];
   const options = {
     selectableRows: "none",
@@ -191,41 +201,27 @@ const QuotationsSubmittedList = () => {
     viewColumns: true,
     download: false,
     print: false,
-    setRowProps: (rowData) => {
-      return {
-        style: {
-          borderBottom: "10px solid #f1f7f9",
-        },
-      };
+    textLabels: {
+      body: {
+        noMatch: loading ? (
+          <CircularProgress />
+        ) : (
+          "Sorry, there is no matching data to display"
+        ),
+      },
     },
   };
-  const usertype = localStorage.getItem("user_type_id");
 
   return (
     <Layout>
-      {loading && (
-        <CircularProgress
-          disableShrink
-          style={{
-            marginLeft: "600px",
-            marginTop: "300px",
-            marginBottom: "300px",
-          }}
-          color="secondary"
-        />
-      )}
       <QuotationsFilter />
-      <div className="flex flex-col md:flex-row justify-between items-center bg-white mt-5 p-2 rounded-lg space-y-4 md:space-y-0">
-        <h3 className="text-center md:text-left text-lg md:text-xl font-bold">
-          Quotations Submitted
-        </h3>
-      </div>
-      <div className="mt-5">
+
+      <div className="mt-1">
         <MUIDataTable
+          title=" Quotation Submitted"
           data={brandListData ? brandListData : []}
           columns={columns}
           options={options}
-          
         />
       </div>
     </Layout>

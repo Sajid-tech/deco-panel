@@ -52,7 +52,7 @@ const PendingOrdersList = () => {
       }
     };
     fetchCountryData();
-    setLoading(false);
+  
   }, []);
 
  const sendEmail = (e,value) => {
@@ -82,7 +82,7 @@ const PendingOrdersList = () => {
       label: "Order Date",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
         customBodyRender: (orders_date) => {
           return moment(orders_date).format("DD-MM-YYYY");
         }
@@ -93,7 +93,7 @@ const PendingOrdersList = () => {
       label: "Order No",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     {
@@ -101,134 +101,140 @@ const PendingOrdersList = () => {
       label: "User",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
+    // {
+    //   name: "orders_status",
+    //   label: "Status",
+    //   options: {
+    //     filter: true,
+    //     sort: false,
+    //     customBodyRender: (orders_status) => {
+    //       return orders_status === "Order" ? (
+    //         <Stack>
+    //           <Chip className="md:w-[50%]" label="Order" color="primary" />
+    //         </Stack>
+    //       ) : orders_status === "Cancel" ? (
+    //         <Stack>
+    //           <Chip
+    //             className="md:w-[50%]"
+    //             sx={{ background: "yellow", color: "black" }}
+    //             label="Cancel"
+    //           />
+    //         </Stack>
+    //       ) : (
+    //         <Stack>
+    //           <Chip
+    //             className="md:w-[50%]"
+    //             sx={{ background: "lightblue", color: "black" }}
+    //             label="Quotation"
+    //           />
+    //         </Stack>
+    //       );
+    //     },
+    //   },
+    // },
     {
       name: "orders_status",
       label: "Status",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
         customBodyRender: (orders_status) => {
-          return orders_status === "Order" ? (
-            <Stack>
-              <Chip className="md:w-[50%]" label="Order" color="primary" />
-            </Stack>
-          ) : orders_status === "Cancel" ? (
-            <Stack>
-              <Chip
-                className="md:w-[50%]"
-                sx={{ background: "yellow", color: "black" }}
-                label="Cancel"
-              />
-            </Stack>
-          ) : (
-            <Stack>
-              <Chip
-                className="md:w-[50%]"
-                sx={{ background: "lightblue", color: "black" }}
-                label="Quotation"
-              />
-            </Stack>
-          );
-        },
-      },
-    },
-    {
-      name: "id",
-      label: "Action",
-      options: {
-        filter: false,
-        sort: false,
-        customBodyRender: (id) => {
+          let bgColor = "";
+          let textColor = "text-black";
+    
+          if (orders_status === "Order") {
+            bgColor = "bg-blue-100 text-blue-800";
+          } else if (orders_status === "Cancel") {
+            bgColor = "bg-yellow-200 text-black";
+          } else {
+          
+            bgColor = "bg-sky-200 text-black";
+          }
+    
           return (
-            <div className="flex items-center space-x-2">
-              <Tooltip title="Edit" placement="top">
-                <IconButton
-                  aria-label="Edit"
-                  style={{
-                    display:
-                      localStorage.getItem("user_type_id") == 1 ? "none" : "",
-                  }}
-                >
-                  <Link to={`/edit-order/${id}`}>
-                    <Edit />
-                  </Link>
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Generate Quotation" placement="top">
-                <IconButton
-                  aria-label="Generate Quotation"
-                  style={{
-                    display:
-                      localStorage.getItem("user_type_id") == 1 ? "none" : "",
-                  }}
-                >
-                  <Link to={`/add-quotations/${id}`}>
-                    <ConfirmationNumberIcon />
-                  </Link>
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="View" placement="top">
-                <IconButton aria-label="View">
-                  <Link to={`/view-order/${id}`}>
-                    <Visibility />
-                  </Link>
-                </IconButton>
-              </Tooltip>
+            <div className={`w-fit px-2 py-1 text-sm font-medium rounded-md text-center  ${bgColor} ${textColor}`}>
+              {orders_status}
             </div>
           );
         },
       },
     },
+    
+
+    
+    {
+      name: "id",
+      label: "ACTION",
+      options: {
+        filter: false,
+        sort: false,
+        customBodyRender: (id) => (
+          <div className="flex items-center space-x-1">
+            {localStorage.getItem("user_type_id") != 1 && (
+              <>
+                <Tooltip title="Edit" placement="top">
+                  <IconButton aria-label="Edit" size="small">
+                    <Link to={`/edit-order/${id}`}><Edit fontSize="small"/></Link>
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Generate Quotation" placement="top">
+                  <IconButton aria-label="Generate Quotation" size="small">
+                    <Link to={`/add-quotations/${id}`}><ConfirmationNumberIcon fontSize="small"/></Link>
+                  </IconButton>
+                </Tooltip>
+              </>
+            )}
+            <Tooltip title="View" placement="top">
+              <IconButton aria-label="View" size="small">
+                <Link to={`/view-order/${id}`}><Visibility fontSize="small"/></Link>
+              </IconButton>
+            </Tooltip>
+          </div>
+        )
+      }
+    }
   ];
   const options = {
     selectableRows: "none",
     elevation: 0,
     responsive: "standard",
-    viewColumns: true,
+    viewColumns: false,
     download: false,
     print: false,
-    setRowProps: (rowData) => {
-      return {
-        style: {
-          borderBottom: "10px solid #f1f7f9",
-        },
-      };
-    },
+    customToolbar: () => {
+              return (
+               
+                   <button
+                   onClick={() => navigate("/create-order")}
+                   className="btn btn-primary text-center md:text-right text-white bg-blue-600 hover:bg-blue-700 text-sm px-2 py-1 rounded shadow-md"
+                 >
+                    + Order
+                 </button>
+              );
+            },
+            textLabels: {
+              body: {
+                noMatch: loading ? (
+                  <CircularProgress />
+                ) : (
+                  "Sorry, there is no matching data to display"
+                ),
+              },
+            },
   };
-  const usertype = localStorage.getItem("user_type_id");
+
 
   return (
     <Layout>
-      {loading && (
-        <CircularProgress
-          disableShrink
-          style={{
-            marginLeft: "600px",
-            marginTop: "300px",
-            marginBottom: "300px",
-          }}
-          color="secondary"
-        />
-      )}
+     
       <CreateOrderFilter />
-      <div className="flex flex-col md:flex-row justify-between items-center bg-white mt-5 p-2 rounded-lg space-y-4 md:space-y-0">
-        <h3 className="text-center md:text-left text-lg md:text-xl font-bold">
-        Pending Orders List
-        </h3>
-        <Link
-          to="/create-order"
-          className="btn btn-primary text-center md:text-right text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-md"
-        >
-          <button >
-            + Add New
-          </button>
-        </Link>
-      </div>
-      <div className="mt-5">
+     
+      <div className="mt-1">
         <MUIDataTable
+        title ="Pending Order List"
           data={OrderListData ? OrderListData : []}
           columns={columns}
           options={options}

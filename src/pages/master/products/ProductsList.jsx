@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import { ContextPanel } from "../../../utils/ContextPanel";
+import React, {  useEffect, useState } from "react";
+
 import { Link, useNavigate } from "react-router-dom";
 import MUIDataTable from "mui-datatables";
 import { MdEdit } from "react-icons/md";
@@ -12,16 +12,13 @@ import { Badge, Chip, CircularProgress, Stack } from "@mui/material";
 const ProductsList = () => {
   const [productData, setProductData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { isPanelUp } = useContext(ContextPanel);
+  
   const navigate = useNavigate();
-
+  const usertype = localStorage.getItem("user_type_id");
   useEffect(() => {
     const fetchCountryData = async () => {
       try {
-        if (!isPanelUp) {
-          navigate("/maintenance");
-          return;
-        }
+        
         setLoading(true);
         const token = localStorage.getItem("token");
         const response = await axios.get(
@@ -41,16 +38,36 @@ const ProductsList = () => {
       }
     };
     fetchCountryData();
-    setLoading(false);
+    
   }, []);
 
   const columns = [
+    {
+      name: "products_image",
+      label: "IMAGE",
+      options: {
+        filter: false,
+        sort: false,
+        customBodyRender: (products_image) => {
+          return (
+            <img
+              src={
+                "https://decopanel.in/storage/app/public/allimages/" +
+                products_image
+              }
+              className="media-object rounded-full w-14 h-14"
+              alt="Product"
+            />
+          );
+        },
+      },
+    },
     {
       name: "product_category",
       label: "Category",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     {
@@ -58,7 +75,7 @@ const ProductsList = () => {
       label: "Sub Category",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     {
@@ -66,7 +83,7 @@ const ProductsList = () => {
       label: "Brand",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     {
@@ -74,7 +91,7 @@ const ProductsList = () => {
       label: "Thickness",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
         customBodyRender: (value, tableMeta) =>{
           const products_unit = productData[tableMeta.rowIndex].products_unit;
           return value+" "+products_unit;
@@ -86,7 +103,7 @@ const ProductsList = () => {
       label: "Size",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
         customBodyRender: (value, tableMeta) =>{
           const products_size2 = productData[tableMeta.rowIndex].products_size2;
           return value+" x "+products_size2;
@@ -98,7 +115,7 @@ const ProductsList = () => {
       label: "Rate",
       options: {
         filter: true,
-        sort: false,
+        sort: true,
       },
     },
     {
@@ -106,27 +123,27 @@ const ProductsList = () => {
       label: "Status",
       options: {
         filter: false,
-        sort: false,
+        sort: true,
         customBodyRender: (product_status) => {
-          return product_status === "Active" ? (
-            <Stack>
-              <Chip  className="md:w-[60%]"  label="Active" color="primary" />
-            </Stack>
-          ) : (
-            <Stack>
-              <Chip
-               className="md:w-[60%]"
-                sx={{  background: "yellow", color: "black" }}
-                label="Inactive"
-              />
-            </Stack>
+          return (
+            <div className="w-fit px-2 py-1 text-sm font-medium rounded-md 
+            text-center 
+              bg-blue-100 text-blue-800"
+              style={product_status !== "Active" ? {
+                backgroundColor: "#fef08a", 
+                color: "#1c1917" 
+              } : {}}
+            >
+              {product_status === "Active" ? "Active" : "Inactive"}
+            </div>
           );
         },
       },
     },
+    
     {
       name: "id",
-      label: "Action",
+      label: "ACTION",
       options: {
         filter: false,
         sort: false,
@@ -151,46 +168,38 @@ const ProductsList = () => {
     viewColumns: true,
     download: false,
     print: false,
-    setRowProps: (rowData) => {
-      return {
-        style: {
-          borderBottom: "10px solid #f1f7f9",
-        },
-      };
-    },
+   customToolbar: () => {
+         return (
+           <button
+             onClick={() => navigate("/add-product")}
+             className={`btn btn-primary text-center md:text-right text-white bg-blue-600 hover:bg-blue-700 text-sm px-2 py-1 rounded shadow-md ${
+               usertype !== 1 ? "inline-block" : "hidden"
+             }`}
+           >
+             + Product
+           </button>
+         );
+       },
+       textLabels: {
+         body: {
+           noMatch: loading ? (
+             <CircularProgress />
+           ) : (
+             "Sorry, there is no matching data to display"
+           ),
+         },
+       },
   };
-  const usertype = localStorage.getItem("user_type_id");
+
 
   return (
     <Layout>
-      {loading && (
-        <CircularProgress
-          disableShrink
-          style={{
-            marginLeft: "600px",
-            marginTop: "300px",
-            marginBottom: "300px",
-          }}
-          color="secondary"
-        />
-      )}
+     
       <MasterFilter />
-      <div className="flex flex-col md:flex-row justify-between items-center bg-white mt-5 p-2 rounded-lg space-y-4 md:space-y-0">
-        <h3 className="text-center md:text-left text-lg md:text-xl font-bold">
-        BrandList
-        </h3>
-
-        <Link
-          to="/add-product"
-          className="btn btn-primary text-center md:text-right text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-md"
-        >
-          <button className={usertype !== 1 ? "inline-block" : "hidden"}>
-            + Add New
-          </button>
-        </Link>
-      </div>
-      <div className="mt-5">
+    
+      <div className="mt-1">
         <MUIDataTable
+        title="Products List"
           data={productData ? productData : []}
           columns={columns}
           options={options}

@@ -17,7 +17,8 @@ import {
 } from "react-icons/md";
 import SelectProduct from "../../components/SelectProduct";
 import CreateOrderFilter from "../../components/CreateOrderFilter";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
+
 
 
 const CreateOrders = () => {
@@ -195,19 +196,19 @@ const CreateOrders = () => {
         order_sub_data: items,
       };
 
-      await axios.post(`${BASE_URL}/api/web-create-order`, data, {
+     const response = await axios.post(`${BASE_URL}/api/web-create-order`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      toast.success("Order Created Successfully");
+      toast.success(response.data.msg);
       setTimeout(() => {
         navigate("/order-list");
       }, 500);
     } catch (error) {
-      console.error("Error creating order", error);
-      toast.error("Error creating order");
+       toast.error(error.response.data.message, error);
+              console.error(error.response.data.message, error);
     }
   };
 
@@ -279,7 +280,7 @@ const CreateOrders = () => {
                   <div className="md:hidden">
                     <div className="flex gap-1 mb-3">
                       <input
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 cursor-pointer"
+                        className="flex-1 px-3 py-2 border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
                         placeholder="Select Product"
                         readOnly
                         value={item.orders_sub_product_id ? item.orders_sub_product_id : ""}
@@ -304,6 +305,7 @@ const CreateOrders = () => {
                         value={item.orders_sub_quantity}
                         onChange={(e) => onChange(e, index)}
                         ref={(el) => (quantityRefs.current[index] = el)}
+                        maxLength={6}
                       />
                     </div>
                     
@@ -391,7 +393,7 @@ const CreateOrders = () => {
                     <div className="grid grid-cols-12 gap-3 items-center">
                       <div className="col-span-2">
                         <input
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 cursor-pointer"
+                          className="w-full px-3 py-2 border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
                           placeholder="Select Product"
                           readOnly
                           value={item.orders_sub_product_id ? item.orders_sub_product_id : ""}
@@ -480,6 +482,7 @@ const CreateOrders = () => {
                           value={item.orders_sub_quantity}
                           onChange={(e) => onChange(e, index)}
                           ref={(el) => (quantityRefs.current[index] = el)}
+                          maxLength={6}
                         />
                       </div>
                       

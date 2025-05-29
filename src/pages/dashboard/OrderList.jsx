@@ -8,6 +8,7 @@ import Layout from '../../layout/Layout';
 import CreateOrderFilter from '../../components/CreateOrderFilter';
 import { Visibility } from '@mui/icons-material';
 import moment from 'moment';
+import { toast } from 'sonner';
 
 const OrderList = () => {
     const [orderList, setOrderList] = useState(null);
@@ -28,9 +29,10 @@ const OrderList = () => {
             }
           );
           setOrderList(response.data.orders);
-          console.log("set order list", response.data.orders);
+    
         } catch (error) {
-          console.error("error while fetching select product ", error);
+          toast.error(error.response.data.message, error);
+          console.error(error.response.data.message, error);
         } finally {
           setLoading(false);
         }

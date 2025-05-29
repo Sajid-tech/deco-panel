@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, {  useEffect, useState } from "react";
 
 import { Link, useNavigate } from "react-router-dom";
 import MUIDataTable from "mui-datatables";
@@ -14,25 +14,23 @@ import {
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import { Edit, Visibility } from "@mui/icons-material";
 import moment from "moment";
-import { ContextPanel } from "../../utils/ContextPanel";
+
 import BASE_URL from "../../base/BaseUrl";
 import Layout from "../../layout/Layout";
 import CreateOrderFilter from "../../components/CreateOrderFilter";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
+
 
 const PendingOrdersList = () => {
   const [OrderListData, setOrderListData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { isPanelUp } = useContext(ContextPanel);
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCountryData = async () => {
       try {
-        if (!isPanelUp) {
-          navigate("/maintenance");
-          return;
-        }
+        
         setLoading(true);
         const token = localStorage.getItem("token");
         const response = await axios.get(
@@ -46,7 +44,8 @@ const PendingOrdersList = () => {
         const res = response.data?.orders;
         setOrderListData(res);
       } catch (error) {
-        console.error("Error fetching Catagory data", error);
+             toast.error(error.response.data.message, error);
+                console.error(error.response.data.message, error);
       } finally {
         setLoading(false);
       }

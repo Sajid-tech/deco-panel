@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {  useEffect, useRef, useState } from "react";
 import Layout from "../../../layout/Layout";
 import ReportFilter from "../../../components/ReportFilter";
-import { ContextPanel } from "../../../utils/ContextPanel";
+
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import BASE_URL from "../../../base/BaseUrl";
@@ -12,20 +12,18 @@ import { FaRegFilePdf } from "react-icons/fa";
 import MUIDataTable from "mui-datatables";
 import moment from "moment";
 import { CircularProgress } from "@mui/material";
+import { toast } from "sonner";
 
 const ReportOrderDetails = () => {
   const [orderData, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { isPanelUp } = useContext(ContextPanel);
+
   const navigate = useNavigate();
   const tableRef = useRef(null);
   useEffect(() => {
     const fetchReprotOrder = async () => {
       try {
-        if (!isPanelUp) {
-          navigate("/maintenance");
-          return;
-        }
+       
         setLoading(true);
         const data = {
           order_user_id: localStorage.getItem("order_user_id"),
@@ -45,9 +43,10 @@ const ReportOrderDetails = () => {
         );
 
         setOrder(response.data?.order);
-        console.log("report order report", response.data.order);
+     
       } catch (error) {
-        console.error("Error fetching one report order data", error);
+        toast.error(error.response.data.message, error);
+        console.error(error.response.data.message, error);
       } finally {
         setLoading(false);
       }
@@ -157,7 +156,7 @@ const ReportOrderDetails = () => {
 
       <div className="mt-1" ref={tableRef}>
         <MUIDataTable
-        title=" Order Details Report"
+        title="Orders Detailed Report"
           data={orderData ? orderData : []}
           columns={columns}
           options={options}

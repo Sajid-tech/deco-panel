@@ -5,16 +5,21 @@ import axios from "axios";
 import BASE_URL from "../../../base/BaseUrl";
 import Layout from "../../../layout/Layout";
 import moment from "moment";
+import html2pdf from "html2pdf.js";
+import { toast } from "sonner";
+
 
 const ViewQuotions = () => {
   const [viewQuotions, setViewQuotions] = useState(null);
   const [viewSubQuotions, setViewSubQuotions] = useState(null);
   const [quotationSubSum, setQuotationSubSum] = useState([]);
-  console.log(quotationSubSum)
+  const [whatsappLoading, setWhatsappLoading] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const printRef = useRef();
+
   useEffect(() => {
     const fetchViewOrder = async () => {
       try {
@@ -31,24 +36,197 @@ const ViewQuotions = () => {
         setViewQuotions(response.data?.quotation);
         setViewSubQuotions(response.data?.quotationSub);
         setQuotationSubSum(response.data?.quotationSubSum);
-        console.log("set order list", response.data.quotions);
+   
       } catch (error) {
-        console.error("error while fetching select product ", error);
+        toast.error(error.response.data.message, error);
+        console.error(error.response.data.message, error)
       } finally {
         setLoading(false);
       }
     };
     fetchViewOrder();
-  
   }, [1]);
 
+  // const whatsappPdf = async () => {
+  //   try {
+  //     setWhatsappLoading(true);
+  //     const element = printRef.current;
+  
+  //     const options = {
+  //       margin: 10,
+  //       filename: "Quotation.pdf",
+  //       image: { type: "jpeg", quality: 0.98 },
+  //       html2canvas: {
+  //         scale: 2,
+  //         useCORS: true,
+  //         windowHeight: element.scrollHeight,
+  //       },
+  //       jsPDF: {
+  //         unit: "mm",
+  //         format: "a4",
+  //         orientation: "portrait",
+  //       },
+  //       pagebreak: { mode: "avoid-all" },
+  //     };
+  
+  //     const pdfOutput = await html2pdf()
+  //       .from(element)
+  //       .set(options)
+  //       .toPdf()
+  //       .get("pdf");
+  
+  //     const pdfBlob = pdfOutput.output("blob");
+  //     const file = new File([pdfBlob], "Quotation.pdf", {
+  //       type: "application/pdf",
+  //     });
+  
+  //     const message = `Quotation Details:\n\nClient: ${viewQuotions?.full_name || ""}\nQuotation No: ${viewQuotions?.quotation_no || ""}\nDate: ${viewQuotions?.quotation_date || ""}\n\nPlease find the attached quotation.`;
+  
+  //     if (
+  //       navigator.share &&
+  //       navigator.canShare &&
+  //       navigator.canShare({ files: [file] })
+  //     ) {
+  //       await navigator.share({
+  //         files: [file],
+  //         text: message,
+  //       });
+  //       return;
+  //     }
+  
+  //     const fileUrl = URL.createObjectURL(file);
+  
+  //     if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+  //       if (navigator.share) {
+  //         try {
+  //           await navigator.share({
+  //             text: message,
+  //             url: fileUrl,
+  //           });
+  //           URL.revokeObjectURL(fileUrl);
+  //           return;
+  //         } catch (mobileShareError) {
+  //           console.log("Mobile share failed:", mobileShareError);
+  //         }
+  //       }
+  
+  //       const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;
+  //       window.location.href = whatsappUrl;
+  
+  //       setTimeout(() => {
+  //         const webWhatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+  //         window.open(webWhatsappUrl, "_blank");
+  //       }, 1000);
+  
+  //       URL.revokeObjectURL(fileUrl);
+  //       return;
+  //     }
+  
+  //     const webWhatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+  //     window.open(webWhatsappUrl, "_blank");
+  //   } catch (error) {
+  //     console.error("Error in whatsappPdf:", error);
+  //     alert("There was an error sharing the PDF. Please try again.");
+  //   }finally {
+  //     setWhatsappLoading(false);
+  //   }
+  // };
+  const whatsappPdf = async () => {
+    try {
+      setWhatsappLoading(true);
+      const element = printRef.current;
+  
+      const options = {
+        margin: 10,
+        filename: "Quotation.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          windowHeight: element.scrollHeight,
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait",
+        },
+        pagebreak: { mode: "avoid-all" },
+      };
+  
+      const pdfOutput = await html2pdf()
+        .from(element)
+        .set(options)
+        .toPdf()
+        .get("pdf");
+  
+      const pdfBlob = pdfOutput.output("blob");
+      const file = new File([pdfBlob], "Quotation.pdf", {
+        type: "application/pdf",
+      });
+  
+      const message = `Quotation Details:\n\nClient: ${viewQuotions?.full_name || ""}\nQuotation No: ${viewQuotions?.quotation_no || ""}\nDate: ${viewQuotions?.quotation_date || ""}\n\nPlease find the attached quotation.`;
+  
+      
+      alert("PDF generated successfully!");
+  
+    
+      if (navigator.share) {
+        try {
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              text: message,
+            });
+            return;
+          } else {
+           
+            const fileUrl = URL.createObjectURL(file);
+            await navigator.share({
+              text: message,
+              url: fileUrl,
+            });
+            URL.revokeObjectURL(fileUrl);
+            return;
+          }
+        } catch (shareError) {
+          console.log("Navigator share failed, falling back to WhatsApp:", shareError);
+         
+        }
+      }
+  
+      const encodedMessage = encodeURIComponent(message);
+      
+     
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        
+        const whatsappUrl = `whatsapp://send?text=${encodedMessage}`;
+        window.location.href = whatsappUrl;
+        
+      
+        setTimeout(() => {
+          const webWhatsappUrl = `https://web.whatsapp.com/send?text=${encodedMessage}`;
+          window.open(webWhatsappUrl, "_blank");
+        }, 1500);
+      } else {
+       
+        const webWhatsappUrl = `https://web.whatsapp.com/send?text=${encodedMessage}`;
+        window.open(webWhatsappUrl, "_blank");
+      }
+  
+    } catch (error) {
+      console.error("Error in whatsappPdf:", error);
+      alert("There was an error sharing the PDF. Please try again.");
+    } finally {
+      setWhatsappLoading(false);
+    }
+  };
 
   if (loading) {
     return (
       <Layout>
-      <div className="flex justify-center items-center h-56">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
+        <div className="flex justify-center items-center h-56">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
       </Layout>
     );
   }
@@ -56,17 +234,18 @@ const ViewQuotions = () => {
   if (!viewQuotions) {
     return (
       <Layout>
-      <div className="flex justify-center flex-col mt-48 items-center h-56">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        <div className="text-gray-400 animate-pulse">Loading</div>
-      </div>
+        <div className="flex justify-center flex-col mt-48 items-center h-56">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="text-gray-400 animate-pulse">Loading</div>
+        </div>
       </Layout>
     );
   }
   return (
     <Layout>
-      <div className="p-4 md:p-6 max-w-4xl mx-auto mt-5">
-        <ReactToPrint
+      <div className="p-4  bg-white h-screen w-full mx-auto ">
+       <div className=" flex flex-row items-center justify-end gap-2">
+       <ReactToPrint
           trigger={() => (
             <button className=" bg-blue-500 text-white py-2 px-4 rounded mb-4">
               Print Quotation
@@ -74,8 +253,45 @@ const ViewQuotions = () => {
           )}
           content={() => printRef.current}
         />
+      
+      <button
+  className="bg-green-500 text-white py-2 px-4 rounded mb-4 flex items-center justify-center gap-2 disabled:opacity-50"
+  onClick={whatsappPdf}
+  disabled={whatsappLoading}
+>
+  {whatsappLoading ? (
+    <>
+      <svg
+        className="animate-spin h-4 w-4 text-white"
+        viewBox="0 0 24 24"
+        fill="none"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v8H4z"
+        ></path>
+      </svg>
+      Loading...
+    </>
+  ) : (
+    "WhatsApp"
+  )}
+</button>
 
-        <div ref={printRef} className="print-container ">
+
+          
+       </div>
+
+        <div ref={printRef} className="print-container  ">
           <div className="grid grid-cols-3 gap-4 mb-6 border-b pb-4">
             <div>
               <p className="font-semibold text-black">Client:</p>
@@ -87,7 +303,9 @@ const ViewQuotions = () => {
             </div>
             <div className="text-right">
               <p className="font-semibold text-black">Quote Date:</p>
-              <p className="text-black">{moment(viewQuotions.quotation_date).format('DD-MM-YYYY')}</p>
+              <p className="text-black">
+                {moment(viewQuotions.quotation_date).format("DD-MM-YYYY")}
+              </p>
             </div>
           </div>
 
@@ -127,12 +345,12 @@ const ViewQuotions = () => {
                       {item.quotation_sub_quantity}
                     </td>
                     <td className="p-2 border border-black">
-                    {/* {item.quotation_sub_rate.toFixed(2)} */}
-                    {(Number(item.quotation_sub_rate) || 0).toFixed(2)}
+                      {/* {item.quotation_sub_rate.toFixed(2)} */}
+                      {(Number(item.quotation_sub_rate) || 0).toFixed(2)}
                     </td>
                     <td className="p-2 border border-black">
-                    {/* {item.quotation_sub_amount.toFixed(2)} */}
-                    {(Number(item.quotation_sub_amount) || 0).toFixed(2)}
+                      {/* {item.quotation_sub_amount.toFixed(2)} */}
+                      {(Number(item.quotation_sub_amount) || 0).toFixed(2)}
                     </td>
                   </tr>
                 ))}
@@ -140,25 +358,42 @@ const ViewQuotions = () => {
                   <td className="p-4 border border-black font-semibold">
                     Billing on Address
                   </td>
-                  <td className="p-2 border border-black font-bold" >Total  </td>
+                  <td className="p-2 border border-black font-bold">Total </td>
 
-                  <td className="p-2 border border-black font-semibold text-center" colSpan={3}>
-                  {/* {quotationSubSum.toFixed(2)} */}
-                  {(Number(quotationSubSum) || 0).toFixed(2)}
+                  <td
+                    className="p-2 border border-black font-semibold text-center"
+                    colSpan={3}
+                  >
+                    {/* {quotationSubSum.toFixed(2)} */}
+                    {(Number(quotationSubSum) || 0).toFixed(2)}
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex flex-row  gap-4">
-            <div className=" h-20 border border-black  bg-white  w-1/2  ">
-              <span className=" opacity-50">Delevery Address</span>
+          {(viewQuotions?.quotation_shipping || viewQuotions?.quotation_delivery) && (
+  
+
+          <div className="mt-4 flex flex-row gap-4">
+            <div className="h-20 border border-black bg-white w-1/2">
+              <textarea
+                className="w-full h-full resize-none p-2 text-sm text-black outline-none bg-transparent"
+                placeholder="Delivery Address"
+                readOnly
+                value={viewQuotions?.quotation_delivery || ""}
+              />
             </div>
 
-            <div className="  h-20 border border-black  bg-white w-1/2 ">
-              <span className=" opacity-50">Billing Address</span>
+            <div className="h-20 border border-black bg-white w-1/2">
+              <textarea
+                className="w-full h-full resize-none p-2 text-sm text-black outline-none bg-transparent"
+                placeholder="Billing Address"
+                readOnly
+                value={viewQuotions?.quotation_shipping || ""}
+              />
             </div>
           </div>
+          )}
         </div>
       </div>
 

@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, {  useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from '../../../layout/Layout'
 import ReportFilter from '../../../components/ReportFilter'
 import axios from "axios";
 import BASE_URL from "../../../base/BaseUrl";
-import { ContextPanel } from "../../../utils/ContextPanel";
+
 
 const statusOptions = [
   { value: "Quotation", label: "Quotation" },
@@ -29,7 +29,7 @@ const FormQuotationDetails = () => {
   
   const [client, setClient] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { isPanelUp } = useContext(ContextPanel);
+
   const navigate = useNavigate();
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
@@ -45,10 +45,7 @@ const FormQuotationDetails = () => {
   useEffect(() => {
     const fetchVend = async () => {
       try {
-        if (!isPanelUp) {
-          navigate("/maintenance");
-          return;
-        }
+        
         setLoading(true);
         const token = localStorage.getItem("token");
         const response = await axios.get(`${BASE_URL}/api/web-fetch-users`, {
@@ -65,7 +62,7 @@ const FormQuotationDetails = () => {
       }
     };
     fetchVend();
-  }, [isPanelUp, navigate]);
+  }, [ navigate]);
 
   const downloadReport = async (url, fileName) => {
     try {
@@ -90,7 +87,7 @@ const FormQuotationDetails = () => {
       document.body.appendChild(link);
       link.click();
 
-      console.log(`${fileName} downloaded successfully.`);
+      
     } catch (err) {
       console.error(`Error downloading ${fileName}:`, err);
     }
@@ -120,7 +117,7 @@ const FormQuotationDetails = () => {
       <div className="  mt-1  max-w-full mx-auto">
         <div className="bg-white rounded-b-lg shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-xl font-medium text-gray-800">Quotation Details Report</h2>
+            <h2 className="text-xl font-medium text-gray-800">Quotation Detailed Report</h2>
           </div>
           
           <form id="addIndiv" autoComplete="off" className="p-6">

@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import BASE_URL from '../../base/BaseUrl';
 import moment from 'moment';
+import { toast } from 'sonner';
 
 const ViewList = () => {
     const [viewOrder, setViewOrder] = useState(null);
@@ -12,26 +13,6 @@ const ViewList = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const printRef = useRef();
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-56">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (!viewOrder) {
-    return (
-      <Layout>
-      <div className="flex justify-center flex-col mt-48 items-center h-56">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        <div className="text-gray-400 animate-pulse">Loading</div>
-      </div>
-      </Layout>
-    );
-  }
-
   useEffect(() => {
     const fetchViewOrder = async () => {
       try {
@@ -46,45 +27,65 @@ const ViewList = () => {
           }
         );
         setViewOrder(response.data);
-        console.log("set order list", response.data.order);
+
       } catch (error) {
-        console.error("error while fetching select product ", error);
+        toast.error(error.response.data.message, error);
+        console.error(error.response.data.message, error);
       } finally {
         setLoading(false);
       }
     };
     fetchViewOrder();
-    setLoading(false);
+  
   }, [1]);
 
+  if (loading) {
+    return (
+      <Layout>
+      <div className="flex justify-center items-center h-56">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+      </Layout>
+    );
+  }
 
+  if (!viewOrder) {
+    return (
+      <Layout>
+      <div className="flex justify-center flex-col mt-48 items-center h-56">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="text-gray-400 animate-pulse">Loading</div>
+      </div>
+      </Layout>
+    );
+  }
   return (
     <Layout>
-      <div className="p-4 md:p-6 max-w-4xl mx-auto mt-5">
+      <div className="p-4  bg-white h-screen w-full mx-auto ">
+      <div className=" flex flex-row items-center justify-end gap-2">
         <ReactToPrint
           trigger={() => (
             <button className=" bg-blue-500 text-white py-2 px-4 rounded mb-4">
-              Print Order
+              Print Order 
             </button>
           )}
           content={() => printRef.current}
         />
-
-        <div ref={printRef} className="print-container">
+  </div>
+        <div ref={printRef} className="print-container ">
           <div className="grid grid-cols-3 gap-4 mb-6 border-b pb-4">
             <div>
               <p className="font-semibold text-black">Client:</p>
-              <p className="text-black">{viewOrder.order.full_name}</p>
+              <p className="text-black">{viewOrder.order?.full_name}</p>
             </div>
             <div className="text-center">
               <p className="font-semibold text-black">Order No:</p>
-              <p className="text-black">{viewOrder.order.orders_no}</p>
+              <p className="text-black">{viewOrder.order?.orders_no}</p>
             </div>
             <div className="text-right">
               <p className="font-semibold text-black">Order Date:</p>
               <p className="text-black">{moment(viewOrder.order.orders_date).format('DD-MM-YYYY')}</p>
             </div>
-
           </div>
 
           <div className="mt-4">
@@ -134,7 +135,7 @@ const ViewList = () => {
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex flex-col  gap-4">
+          {/* <div className="mt-4 flex flex-row  gap-4">
             <div className=" h-20 border border-black  bg-white  w-1/2  ">
               <span className=" opacity-50">Delevery Address</span>
             </div>
@@ -142,7 +143,7 @@ const ViewList = () => {
             <div className="  h-20 border border-black  bg-white w-1/2 ">
               <span className=" opacity-50">Billing Address</span>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 

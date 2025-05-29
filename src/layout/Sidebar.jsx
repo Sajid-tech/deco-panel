@@ -4,9 +4,10 @@ import { ChevronDown, ChevronRight, Menu, User, LogOut, Settings } from "lucide-
 import { motion } from "framer-motion";
 import Menuitems from "./Menuitems";
 import { Dialog, DialogContent, Button } from "@mui/material";
-import { toast } from "react-toastify";
+
 import axios from "axios";
 import BASE_URL from "../base/BaseUrl";
+import { toast } from "sonner";
 
 const itemVariants = {
   open: { opacity: 1, height: "auto", transition: { duration: 0.3 } },
@@ -353,7 +354,7 @@ const navigate = useNavigate()
           {/* Version Info */}
           <div className="p-2 border-t border-gray-700">
             <div className="text-center text-xs text-gray-500">
-              v{"1.0.0"}
+              v{"2.0.0"}
             </div>
           </div>
         </div>

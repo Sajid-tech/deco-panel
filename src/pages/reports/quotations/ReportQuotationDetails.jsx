@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, {  useEffect, useRef, useState } from 'react'
 import Layout from '../../../layout/Layout'
 import ReportFilter from '../../../components/ReportFilter'
 import MUIDataTable from 'mui-datatables';
-import { ContextPanel } from '../../../utils/ContextPanel';
+
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import BASE_URL from '../../../base/BaseUrl';
@@ -12,20 +12,18 @@ import { IconButton } from '@material-tailwind/react';
 import { FaRegFilePdf } from 'react-icons/fa';
 import moment from 'moment';
 import { CircularProgress } from '@mui/material';
+import { toast } from 'sonner';
 
 const ReportQuotationDetails = () => {
     const [quotation, setQuotation] = useState(null);
     const [loading, setLoading] = useState(false);
-    const { isPanelUp } = useContext(ContextPanel);
+
     const navigate = useNavigate();
     const tableRef = useRef(null);
     useEffect(() => {
       const fetchReprotQuotation = async () => {
         try {
-          if (!isPanelUp) {
-            navigate("/maintenance");
-            return;
-          }
+         
           setLoading(true);
           const data = {
             orders_user_id:localStorage.getItem("orders_user_id"),
@@ -45,9 +43,10 @@ const ReportQuotationDetails = () => {
           );
   
           setQuotation(response.data?.quotation);
-          console.log("report quoattaion report", response.data.quotation);
+        
         } catch (error) {
-          console.error("Error fetching one report quoation data", error);
+          toast.error(error.response.data.message, error);
+          console.error(error.response.data.message, error);
         } finally {
           setLoading(false);
         }
@@ -158,7 +157,7 @@ const ReportQuotationDetails = () => {
 
       <div className="mt-1" ref={tableRef}>
         <MUIDataTable
-        title="Quotation Details Report"
+        title="Quotation Detailed Report"
           data={quotation ? quotation : []}
           columns={columns}
           options={options}

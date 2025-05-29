@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ContextPanel } from "../../../utils/ContextPanel";
+
 import BASE_URL from "../../../base/BaseUrl";
 import axios from "axios";
 import Layout from "../../../layout/Layout";
 import ReportFilter from "../../../components/ReportFilter";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
+
 
 const statusOptions = [
   { value: "Order", label: "Order" },
@@ -29,7 +30,7 @@ const FormOrderDetails = () => {
   
   const [client, setClient] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { isPanelUp } = useContext(ContextPanel);
+ 
   const navigate = useNavigate();
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
@@ -45,10 +46,7 @@ const FormOrderDetails = () => {
   useEffect(() => {
     const fetchVend = async () => {
       try {
-        if (!isPanelUp) {
-          navigate("/maintenance");
-          return;
-        }
+        
         setLoading(true);
         const token = localStorage.getItem("token");
         const response = await axios.get(`${BASE_URL}/api/web-fetch-users`, {
@@ -65,7 +63,7 @@ const FormOrderDetails = () => {
       }
     };
     fetchVend();
-  }, [isPanelUp, navigate]);
+  }, [ navigate]);
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -120,7 +118,7 @@ const FormOrderDetails = () => {
       <div className="max-w-full mt-1 mx-auto">
         <div className="bg-white rounded-b-lg shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-xl font-medium text-gray-800">Order Details Report</h2>
+            <h2 className="text-xl font-medium text-gray-800">Orders Detailed Report</h2>
           </div>
           
           <form id="addIndiv" autoComplete="off" className="p-6" onSubmit={onSubmit}>

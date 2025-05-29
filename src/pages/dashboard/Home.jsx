@@ -15,10 +15,9 @@ const Home = () => {
   const [recentOrders, setRecentOrders] = useState([]);
   const [products, setProducts] = useState(null);
 
-  const [productsCount , setProductsCount] = useState();
-  const [ordersCount , setOrdersCount] = useState();
-  const [usersCount , setUsersCount] = useState();
-
+  const [productsCount, setProductsCount] = useState();
+  const [ordersCount, setOrdersCount] = useState();
+  const [usersCount, setUsersCount] = useState();
 
   const [showTable, setShowTable] = useState(true);
   const [closeCategory, setCloseCategory] = useState(true);
@@ -26,25 +25,21 @@ const Home = () => {
   const [fullClose, setFullClose] = useState(true);
   const [fullCloseCategory, setFullCloseCategory] = useState(true);
 
-  const [loadingRecentOrders, setLoadingRecentOrders] = useState(false); // Loading state for orders
-  const [loadingProducts, setLoadingProducts] = useState(false); // Loading state for products
+  const [loadingRecentOrders, setLoadingRecentOrders] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(false);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const navigate = useNavigate();
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get(
-          `${BASE_URL}/api/web-fetch-year`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        console.log(res)
+        const res = await axios.get(`${BASE_URL}/api/web-fetch-year`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
         setDateYear(res.data?.year?.current_year);
       } catch (error) {
         console.error("Error fetching services:", error);
@@ -54,80 +49,68 @@ const Home = () => {
     fetchData();
   }, []);
 
-  // Fetch both data sets but manage loading states separately
   const fetchRecentOrders = async () => {
     setLoadingRecentOrders(true);
-    if(dateyear){
-    try {
-      const response = await axios.get(
-        `${BASE_URL}/api/web-fetch-dashboard-data-by/${dateyear}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+    if (dateyear) {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/api/web-fetch-dashboard-data-by/${dateyear}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        if (response.status === 200) {
+          setRecentOrders(response.data.pendingOrder);
         }
-      );
-      if (response.status === 200) {
-        setRecentOrders(response.data.pendingOrder);
+      } catch (error) {
+        console.error("Error fetching booking data:", error);
+      } finally {
+        setLoadingRecentOrders(false);
       }
-    } catch (error) {
-      console.error("Error fetching booking data:", error);
-    } finally {
-      setLoadingRecentOrders(false);
     }
-  }
   };
-
-
-
 
   const fetchProducts = async () => {
     setLoadingProducts(true);
-    if(dateyear){
-
-    try {
-      const response = await axios.get(
-        `${BASE_URL}/api/web-fetch-dashboard-data-by/${dateyear}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+    if (dateyear) {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/api/web-fetch-dashboard-data-by/${dateyear}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        if (response.status === 200) {
+          setProducts(response.data.categoryBanner);
+          setProductsCount(response.data.productsCount);
+          setOrdersCount(response.data.ordersCount);
+          setUsersCount(response.data.usersCount);
         }
-      );
-      if (response.status === 200) {
-        setProducts(response.data.categoryBanner);
-        setProductsCount(response.data.productsCount);
-        setOrdersCount(response.data.ordersCount);
-        setUsersCount(response.data.usersCount);
+      } catch (error) {
+        console.error("Error fetching product data:", error);
+      } finally {
+        setLoadingProducts(false);
       }
-    } catch (error) {
-      console.error("Error fetching product data:", error);
-    } finally {
-      setLoadingProducts(false);
     }
-  }
   };
 
   useEffect(() => {
-    fetchProducts(); // Fetch products initially
+    fetchProducts();
+    fetchRecentOrders();
   }, [dateyear]);
 
-
-  useEffect(() => {
-    fetchRecentOrders(); // Fetch orders initially
-  }, [dateyear]);
-
-  // Reload for recent orders
   const handleReload = () => {
-    fetchRecentOrders(); // Only reload recent orders, not products
+    fetchRecentOrders();
   };
 
-  // Reload for products
   const handleCategoryReload = () => {
-    fetchProducts(); 
+    fetchProducts();
   };
 
-  // Slide functionality for product carousel
   useEffect(() => {
     if (products && products.length > 0) {
       const interval = setInterval(() => {
@@ -146,20 +129,19 @@ const Home = () => {
           <div className="bg-[#5e7081] text-white flex items-center justify-center flex-col text-center md:h-24 py-4 rounded-lg transition-transform duration-400">
             <p className="text-md font-bold">Products</p>
             <p className="text-xl font-bold">
-            <CountUp start={0} end={productsCount} />
+              <CountUp start={0} end={productsCount} />
             </p>
-            
           </div>
           <div className="bg-blue-500 text-white flex items-center justify-center flex-col text-center md:h-24 py-4 rounded-lg transition-transform duration-400">
             <p className="text-md font-bold">Clients</p>
             <p className="text-xl font-bold">
-            <CountUp start={0} end={usersCount} />
+              <CountUp start={0} end={usersCount} />
             </p>
           </div>
           <div className="bg-green-500 text-white flex items-center justify-center flex-col text-center md:h-24 py-4 rounded-lg transition-transform duration-400">
             <p className="text-md font-bold">Orders</p>
             <p className="text-xl font-bold">
-            <CountUp start={0} end={ordersCount} />
+              <CountUp start={0} end={ordersCount} />
             </p>
           </div>
         </div>
@@ -290,6 +272,11 @@ const Home = () => {
                                 src={`https://decopanel.in/storage/app/public/product_category/${product.product_category_image}`}
                                 alt="product"
                                 className="w-[400px]"
+                                loading="lazy"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = "https://decopanel.in/storage/app/public/no_image.jpg";
+                                }}
                               />
                               <h3 className="text-center">
                                 {product.product_category}

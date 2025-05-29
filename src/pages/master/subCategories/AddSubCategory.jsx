@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { MdKeyboardBackspace } from "react-icons/md";
+
 import axios from "axios";
-import { toast } from "react-toastify";
+
 import Layout from "../../../layout/Layout";
-import Fields from "../../../common/TextField/TextField";
+
 import BASE_URL from "../../../base/BaseUrl";
-import { Input } from "@material-tailwind/react";
+import { Button, Input } from "@material-tailwind/react";
+import { toast } from "sonner";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
+import { ArrowLeft } from "lucide-react";
 
 const AddSubCategory = () => {
   const navigate = useNavigate();
@@ -20,13 +28,7 @@ const AddSubCategory = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [category, setCategory] = useState([]);
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("id");
-    if (!isLoggedIn) {
-      navigate("/");
-      return;
-    }
-  }, []);
+  
 
 
   useEffect(() => {
@@ -56,11 +58,7 @@ const AddSubCategory = () => {
       return;
     }
     setIsButtonDisabled(true);
-    // const formData = {
-    //     product_category_id: subcategory.product_category_id,
-    //     product_sub_category: subcategory.product_sub_category,
-    //     product_sub_category_image: selectedFile,
-    // };
+   
     const formData = new FormData();
     formData.append("product_category_id", subcategory.product_category_id);
     formData.append("product_sub_category", subcategory.product_sub_category);
@@ -77,20 +75,20 @@ const AddSubCategory = () => {
       );
 
       if (response.data.code == 200) {
-        toast.success("Sub Caterogies Added Successfully");
+        toast.success(response.data.msg);
         navigate("/sub-categories");
       } else {
         if (response.data.code == 401) {
-          toast.error("Sub Caterogies Duplicate Entry");
+          toast.error(response.data.msg);
         } else if (response.data.code == 402) {
-          toast.error("Sub Caterogies Duplicate Entry");
+          toast.error(response.data.msg);
         } else {
-          toast.error("An unknown error occurred");
+          toast.error(response.data.msg);
         }
       }
     } catch (error) {
-      console.error("Error updating Sub Caterogies:", error);
-      toast.error("Error  updating Sub Caterogies");
+          toast.error(error.response.data.message, error);
+          console.error(error.response.data.message, error);
     } finally {
       setIsButtonDisabled(false);
     }
@@ -98,46 +96,64 @@ const AddSubCategory = () => {
 
   return (
     <Layout>
-      <div>
-        {/* Title */}
-        <div className="flex mb-4 mt-6">
-          <Link to="/sub-categories">
-            <MdKeyboardBackspace className=" text-white bg-[#464D69] p-1 w-10 h-8 cursor-pointer rounded-2xl" />
-          </Link>
-          <h1 className="text-2xl text-[#464D69] font-semibold ml-2 content-center">
-          Create Sub Categories
-          </h1>
+          <div className="container mx-auto ">
+       
+
+
+                <div className="bg-white rounded-t-lg shadow-lg p-1 mx-auto w-full">
+          <div className="flex items-center gap-3 px-4 py-2">
+            <Link to="/sub-categories">
+              <ArrowLeft className="text-white bg-blue-500 p-1 w-8 h-8 cursor-pointer rounded-full hover:bg-blue-600 transition-colors" />
+            </Link>
+            <h2 className="text-gray-800 text-xl font-semibold">    Create Sub Categories</h2>
+          </div>
         </div>
-        <div className="p-6 mt-5 bg-white shadow-md rounded-lg">
-          <form onSubmit={onSubmit} autoComplete="off">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+
+        <div className="bg-white rounded-b-lg mt-1 p-6">
+        <form onSubmit={onSubmit} autoComplete="off" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
               <div className="form-group">
-                <Fields
-                  required={true}
-                  title="Category"
-                  type="categoryDropdown"
-                  autoComplete="Name"
-                  name="product_category_id"
-                  value={subcategory.product_category_id}
-                  onChange={(e) => onInputChange(e)}
-                  options={category}
-                />
+               
+                <FormControl fullWidth>
+                                  <InputLabel id="category-select-label">
+                                    <span className="text-sm relative bottom-[6px]">
+                                      Category <span className="text-red-700">*</span>
+                                    </span>
+                                  </InputLabel>
+                                  <Select
+                                    sx={{ height: "40px", borderRadius: "5px" }}
+                                    labelId="category-select-label"
+                                    id="category-select"
+                                    name="product_category_id"
+                                    value={subcategory.product_category_id}
+                                    label="Category"
+                                    onChange={(e) => onInputChange(e)}
+                                    required
+                                  >
+                                    {category?.map((data, key) => (
+                                      <MenuItem key={key} value={data.id}>
+                                        {data.product_category}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
               </div>
               <div className="form-group">
-                <Fields
-                  required={true}
-                  title="Sub Category"
-                  type="textField"
-                  autoComplete="Name"
-                  name="product_sub_category"
-                  value={subcategory.product_sub_category}
-                  onChange={(e) => onInputChange(e)}
-                />
+               
+                <Input
+                                  label="Sub Category"
+                                 required
+                                  autoComplete="Name"
+                                  name="product_sub_category"
+                                  value={subcategory.product_sub_category}
+                                  onChange={(e) => onInputChange(e)}
+                                  maxLength={50}
+                                />
               </div>
 
               <div>
                 <Input
-                  required
+                 
                   type="file"
                   label="Image"
                   name="product_sub_category_image"
@@ -145,20 +161,22 @@ const AddSubCategory = () => {
                 />
               </div>
             </div>
-            <div className="mt-4 text-center">
-              <button
-                type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
-                disabled={isButtonDisabled}
-              >
-                {isButtonDisabled ? "Submiting..." : "Submit"}
-              </button>
-              <Link to="/sub-categories">
-                <button className="bg-green-500 text-white px-4 py-2 rounded-md">
-                  Back
-                </button>
-              </Link>
-            </div>
+            
+             <div className="flex justify-center space-x-4 mt-8">
+                                      <Button
+                                        type="submit"
+                                        color="blue"
+                                        className="px-6 py-2 rounded-md"
+                                        disabled={isButtonDisabled}
+                                      >
+                                        {isButtonDisabled ? "Creating..." : "Create"}
+                                      </Button>
+                                      <Link to="/sub-categories">
+                                        <Button color="gray" className="px-6 py-2 rounded-md">
+                                          Back
+                                        </Button>
+                                      </Link>
+                                    </div>
           </form>
         </div>
       </div>

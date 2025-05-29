@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { MdKeyboardBackspace } from "react-icons/md";
-import axios from "axios";
-import { toast } from "react-toastify";
-import Layout from "../../../layout/Layout";
-import Fields from "../../../common/TextField/TextField";
-import BASE_URL from "../../../base/BaseUrl";
-import { Input } from "@material-tailwind/react";
 
+import axios from "axios";
+
+import Layout from "../../../layout/Layout";
+
+import BASE_URL from "../../../base/BaseUrl";
+import { Button, Input } from "@material-tailwind/react";
+import { toast } from "sonner";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { ArrowLeft } from "lucide-react";
 const status = [
   { value: "Active", label: "Active" },
   { value: "Inactive", label: "Inactive" },
@@ -87,12 +89,6 @@ const EditProduct = () => {
     }
   };
 
-  useEffect(() => {
-    if (!localStorage.getItem("id")) {
-      navigate("/");
-    }
-  }, [navigate]);
-
   const [category, setCategory] = useState([]);
   const [subcategory, setSubCategory] = useState([]);
   const [brand, setBrand] = useState([]);
@@ -108,11 +104,14 @@ const EditProduct = () => {
   useEffect(() => {
     if (product.products_catg_id) {
       axios
-        .get(`${BASE_URL}/api/web-fetch-sub-category/${product.products_catg_id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
+        .get(
+          `${BASE_URL}/api/web-fetch-sub-category/${product.products_catg_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        )
         .then((res) => setSubCategory(res.data?.productSubCategory || []));
     }
   }, [product.products_catg_id]);
@@ -135,18 +134,7 @@ const EditProduct = () => {
 
     setIsButtonDisabled(true);
     const formData = new FormData();
-    // const formData = {
-    //   products_catg_id: product.products_catg_id,
-    //   products_sub_catg_id: product.products_sub_catg_id,
-    //   products_brand: product.products_brand,
-    //   products_thickness: product.products_thickness,
-    //   products_unit: product.products_unit,
-    //   products_size1: product.products_size1,
-    //   products_size2: product.products_size2,
-    //   products_size_unit: product.products_size_unit,
-    //   products_rate: product.products_rate,
-    //   product_status: product.product_status,
-    // };
+ 
     formData.append("products_catg_id", product.products_catg_id);
     formData.append("products_sub_catg_id", product.products_sub_catg_id);
     formData.append("products_brand", product.products_brand);
@@ -157,7 +145,7 @@ const EditProduct = () => {
     formData.append("products_size_unit", product.products_size_unit);
     formData.append("products_rate", product.products_rate);
     formData.append("product_status", product.product_status);
-   
+
     if (selectedFile) {
       formData.append("products_image", selectedFile);
     }
@@ -173,14 +161,14 @@ const EditProduct = () => {
       );
 
       if (response.data.code === 200) {
-        toast.success("Product Updated Successfully");
+        toast.success(response.data.msg);
         navigate("/products");
       } else {
-        toast.error("Product Duplicate Entry");
+        toast.error(response.data.msg);
       }
     } catch (error) {
-      console.error("Error updating product:", error);
-      toast.error("Error updating product");
+           toast.error(error.response.data.message, error);
+           console.error(error.response.data.message, error);
     } finally {
       setIsButtonDisabled(false);
     }
@@ -188,137 +176,233 @@ const EditProduct = () => {
 
   return (
     <Layout>
-      <div>
-        <div className="flex mb-4 mt-6">
-          <Link to="/products">
-            <MdKeyboardBackspace className="text-white bg-[#464D69] p-1 w-10 h-8 cursor-pointer rounded-2xl" />
-          </Link>
-          <h1 className="text-2xl text-[#464D69] font-semibold ml-2 content-center">
-            Edit Product
-          </h1>
+      <div className="container mx-auto ">
+
+
+
+        <div className="bg-white rounded-t-lg shadow-lg p-1 mx-auto w-full">
+          <div className="flex items-center gap-3 px-4 py-2">
+            <Link to="/products">
+              <ArrowLeft className="text-white bg-blue-500 p-1 w-8 h-8 cursor-pointer rounded-full hover:bg-blue-600 transition-colors" />
+            </Link>
+            <h2 className="text-gray-800 text-xl font-semibold">
+              {" "}
+              Edit Product
+            </h2>
+          </div>
         </div>
 
-        <div className="p-6 mt-5 bg-white shadow-md rounded-lg">
+        
+        <div className="bg-white rounded-b-lg mt-1 p-6">
           {/* Display Product Image */}
           {product.products_image && (
             <div className="mb-4">
               <img
                 src={`https://decopanel.in/storage/app/public/allimages/${product.products_image}`}
                 alt="Product"
+                  loading="lazy"
                 className="w-32 h-32 object-cover"
               />
             </div>
           )}
 
-          <form onSubmit={onSubmit} autoComplete="off">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <Fields
-                required
-                title="Category"
-                type="categoryDropdown"
-                name="products_catg_id"
-                value={product.products_catg_id}
-                onChange={onInputChange}
-                options={category}
-              />
-              <Fields
-                required
-                title="Sub Category"
-                type="subCategoryDropdown"
-                name="products_sub_catg_id"
-                value={product.products_sub_catg_id}
-                onChange={onInputChange}
-                options={subcategory}
-              />
-              <Fields
-                title="Brand"
-                type="brandDropdown"
-                name="products_brand"
-                value={product.products_brand}
-                onChange={onInputChange}
-                options={brand}
-              />
+          <form onSubmit={onSubmit} autoComplete="off" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
+              <FormControl fullWidth>
+                <InputLabel id="category-select-label">
+                  <span className="text-sm relative bottom-[6px]">
+                    Category <span className="text-red-700">*</span>
+                  </span>
+                </InputLabel>
+                <Select
+                  sx={{ height: "40px", borderRadius: "5px" }}
+                  labelId="category-select-label"
+                  id="category-select"
+                  name="products_catg_id"
+                  value={product.products_catg_id}
+                  label="Category"
+                  onChange={(e) => onInputChange(e)}
+                  required
+                >
+                  {category?.map((data, key) => (
+                    <MenuItem key={key} value={data.id}>
+                      {data.product_category}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl fullWidth>
+                <InputLabel id="subcategory-select-label">
+                  <span className="text-sm relative bottom-[6px]">
+                    Sub Category <span className="text-red-700">*</span>
+                  </span>
+                </InputLabel>
+                <Select
+                  sx={{ height: "40px", borderRadius: "5px" }}
+                  labelId="subcategory-select-label"
+                  id="subcategory-select"
+                  name="products_sub_catg_id"
+                  value={product.products_sub_catg_id}
+                  label="Sub Category"
+                  onChange={(e) => onInputChange(e)}
+                  required
+                >
+                  {subcategory?.map((data, key) => (
+                    <MenuItem key={data.id} value={data.id}>
+                      {data.product_sub_category}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl fullWidth>
+                <InputLabel id="brand-select-label">
+                  <span className="text-sm relative bottom-[6px]">Brand</span>
+                </InputLabel>
+                <Select
+                  sx={{ height: "40px", borderRadius: "5px" }}
+                  labelId="brand-select-label"
+                  id="brand-select"
+                  name="products_brand"
+                  value={product.products_brand}
+                  label="Brand"
+                  onChange={(e) => onInputChange(e)}
+                >
+                  {brand?.map((data, key) => (
+                    <MenuItem key={data.brands_name} value={data.brands_name}>
+                      {data.brands_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <Fields
-                title="Thickness"
-                type="textField"
+              <Input
+                label="Thickness"
+                autoComplete="Name"
                 name="products_thickness"
                 value={product.products_thickness}
-                onChange={onInputChange}
+                onChange={(e) => onInputChange(e)}
+                maxLength={6}
               />
-              <Fields
-                title="Unit"
-                type="whatsappDropdown"
-                name="products_unit"
-                value={product.products_unit}
-                onChange={onInputChange}
-                options={unit}
-              />
+
+              <FormControl fullWidth>
+                <InputLabel id="unit-select-label">
+                  <span className="text-sm relative bottom-[6px]">Unit</span>
+                </InputLabel>
+                <Select
+                  sx={{ height: "40px", borderRadius: "5px" }}
+                  labelId="unit-select-label"
+                  id="unit-select"
+                  name="products_unit"
+                  value={product.products_unit}
+                  label="Unit"
+                  onChange={(e) => onInputChange(e)}
+                >
+                  {unit.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
               <Input
                 label="Length"
-                type="number"
+                autoComplete="Name"
                 name="products_size1"
                 value={product.products_size1}
-                onChange={onInputChange}
+                onChange={(e) => onInputChange(e)}
+                maxLength={6}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
               <Input
                 label="Breadth"
-                type="number"
+                autoComplete="Name"
                 name="products_size2"
                 value={product.products_size2}
-                onChange={onInputChange}
+                onChange={(e) => onInputChange(e)}
+                maxLength={6}
               />
-              <Fields
-                title="Size Unit"
-                type="whatsappDropdown"
-                name="products_size_unit"
-                value={product.products_size_unit}
-                onChange={onInputChange}
-                options={other_unit}
-              />
+
+              <FormControl fullWidth>
+                <InputLabel id="size-unit-select-label">
+                  <span className="text-sm relative bottom-[6px]">
+                    Size Unit
+                  </span>
+                </InputLabel>
+                <Select
+                  sx={{ height: "40px", borderRadius: "5px" }}
+                  labelId="size-unit-select-label"
+                  id="size-unit-select"
+                  name="products_size_unit"
+                  value={product.products_size_unit}
+                  label="Size Unit"
+                  onChange={(e) => onInputChange(e)}
+                >
+                  {other_unit.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
               <Input
                 label="Rate"
+                required
+                autoComplete="Name"
                 name="products_rate"
-                required
                 value={product.products_rate}
-                onChange={onInputChange}
-              />
-              <Fields
-                required
-                title="Status"
-                type="whatsappDropdown"
-                name="product_status"
-                value={product.product_status}
-                onChange={onInputChange}
-                options={status}
+                onChange={(e) => onInputChange(e)}
+                maxLength={6}
               />
 
-               <Input
-                  type="file"
-                  label="Product Image"
-                  name="products_image"
-                  onChange={(e) => setSelectedFile(e.target.files[0])}
-                  required={!product.products_image} 
-                />
+              <FormControl fullWidth>
+                <InputLabel id="size-unit-select-label">
+                  <span className="text-sm relative bottom-[6px]">Status</span>
+                </InputLabel>
+                <Select
+                  sx={{ height: "40px", borderRadius: "5px" }}
+                  labelId="size-unit-select-label"
+                  id="size-unit-select"
+                  name="product_status"
+                  value={product.product_status}
+                  label="Size Unit"
+                  onChange={(e) => onInputChange(e)}
+                >
+                  {status.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <Input
+                type="file"
+                label="Product Image"
+                name="products_image"
+                onChange={(e) => setSelectedFile(e.target.files[0])}
+              />
             </div>
 
-            <div className="mt-4 text-center">
-              <button
+            <div className="flex justify-center space-x-4 mt-8">
+              <Button
                 type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
+                color="blue"
+                className="px-6 py-2 rounded-md"
                 disabled={isButtonDisabled}
               >
                 {isButtonDisabled ? "Updating..." : "Update"}
-              </button>
+              </Button>
               <Link to="/products">
-                <button className="bg-green-500 text-white px-4 py-2 rounded-md">
+                <Button color="gray" className="px-6 py-2 rounded-md">
                   Back
-                </button>
+                </Button>
               </Link>
             </div>
           </form>

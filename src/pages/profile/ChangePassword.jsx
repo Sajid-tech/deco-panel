@@ -11,7 +11,8 @@ import {
 import Layout from "../../layout/Layout";
 import BASE_URL from "../../base/BaseUrl";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
+
 
 const ChangePassword = () => {
   const [password, setPassword] = useState({
@@ -74,7 +75,7 @@ const ChangePassword = () => {
 
   return (
     <Layout>
-      <div className="mt-12 mb-8 flex flex-col gap-12">
+      <div className="mt-6 mb-8 flex flex-col gap-12">
         <form onSubmit={onSubmit} autoComplete="off">
           <Card>
             <CardHeader variant="gradient" color="white" className="mb-8 p-6">
@@ -109,6 +110,7 @@ const ChangePassword = () => {
                 size="lg"
                 color="blue"
                 required
+                maxLength={16}
                 name="confirm_password"
                 value={password.confirm_password}
                 onChange={(e) => onInputChange(e)}
@@ -123,7 +125,7 @@ const ChangePassword = () => {
                 fullWidth
               >
                 
-                {isButtonDisabled ? 'Submiting...' : 'Submit'}
+                {isButtonDisabled ? 'Updating....' : 'Update Password'}
               </Button>
             </CardFooter>
           </Card>

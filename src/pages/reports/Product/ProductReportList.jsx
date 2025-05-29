@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, {  useEffect, useRef, useState } from 'react'
 import Layout from '../../../layout/Layout'
 import ReportFilter from '../../../components/ReportFilter'
-import { ContextPanel } from '../../../utils/ContextPanel';
+
 import { useNavigate } from 'react-router-dom';
 import MUIDataTable from 'mui-datatables';
 import { CircularProgress, IconButton } from '@mui/material';
@@ -10,21 +10,19 @@ import axios from 'axios';
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import BASE_URL from '../../../base/BaseUrl';
+import { toast } from 'sonner';
 
 const ProductReportList = () => {
     const [productReport, setProductReport] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { isPanelUp } = useContext(ContextPanel);
+ 
   const navigate = useNavigate();
   const tableRef = useRef(null);
 
   useEffect(() => {
     const fetchProductReprot = async () => {
       try {
-        if (!isPanelUp) {
-          navigate("/maintenance");
-          return;
-        }
+        
         setLoading(true);
         const token = localStorage.getItem("token");
         const response = await axios.get(
@@ -41,7 +39,8 @@ const ProductReportList = () => {
 
         setProductReport(response.data?.products);
       } catch (error) {
-        console.error("Error fetching product report data", error);
+        toast.error(error.response.data.message, error);
+        console.error(error.response.data.message, error);
       } finally {
         setLoading(false);
       }
@@ -209,7 +208,7 @@ const ProductReportList = () => {
 
       <div className="mt-1" ref={tableRef}>
         <MUIDataTable
-        title ="Product Report"
+        title ="Products Report"
           data={productReport ? productReport : []}
           columns={columns}
           options={options}

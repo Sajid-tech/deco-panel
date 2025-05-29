@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { MdKeyboardBackspace } from "react-icons/md";
+
 import axios from "axios";
-import { toast } from "react-toastify";
-import Layout from "../../../layout/Layout";
-import Fields from "../../../common/TextField/TextField";
+
+
+
 import BASE_URL from "../../../base/BaseUrl";
-import { Input } from "@material-tailwind/react";
+
 import { Card, CardContent, Dialog, Tooltip } from "@mui/material";
 import { HighlightOff } from "@mui/icons-material";
+import { toast } from "sonner";
+import { Input } from "@material-tailwind/react";
 
 const CreateSubCaterogy = (props) => {
   const navigate = useNavigate();
@@ -20,13 +22,7 @@ const CreateSubCaterogy = (props) => {
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("id");
-    if (!isLoggedIn) {
-      navigate("/");
-      return;
-    }
-  }, []);
+ 
 
   const onInputChange = (e) => {
 
@@ -89,7 +85,7 @@ const CreateSubCaterogy = (props) => {
         aria-describedby="alert-dialog-slide-description"
         // className="m-3  rounded-lg shadow-xl"
       >
-        <form onSubmit={onSubmit} autoComplete="off">
+        <form  autoComplete="off">
           <Card className="p-6 space-y-1 w-[400px]">
             <CardContent>
               <div className="flex justify-between items-center mb-4">
@@ -101,6 +97,7 @@ const CreateSubCaterogy = (props) => {
                     <button
                       className="ml-3 pl-2 hover:bg-gray-200 rounded-full"
                       onClick={props.onClick}
+                             type="button"
                     >
                       <HighlightOff />
                     </button>
@@ -110,20 +107,22 @@ const CreateSubCaterogy = (props) => {
 
               <div className="mt-2">
                 <div>
-                  <Fields
-                    required={true}
-                    title="Sub Category"
-                    type="textField"
-                    autoComplete="Name"
-                    name="product_sub_category"
-                    value={subcategory.product_sub_category}
-                    onChange={(e) => onInputChange(e)}
-                  />
+               
+                    <Input
+                                    label="Sub Category"
+                                   
+                                    autoComplete="Name"
+                                    name="product_sub_category"
+                                    value={subcategory.product_sub_category}
+                                    onChange={(e) => onInputChange(e)}
+                                 
+                                  />
                 </div>
                 <div className="mt-5 flex justify-center">
                   <button
                     disabled={isButtonDisabled}
-                    type="submit"
+                    type="button"
+                    onClick={onSubmit}
                     className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
                   >
                     {isButtonDisabled ? "Submiting..." : "Submit"}

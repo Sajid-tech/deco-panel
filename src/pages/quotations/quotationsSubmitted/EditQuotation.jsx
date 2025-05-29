@@ -1,59 +1,75 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { MdKeyboardBackspace } from "react-icons/md";
+
 import axios from "axios";
-import { toast } from "react-toastify";
+
 import Layout from "../../../layout/Layout";
-import Fields from "../../../common/TextField/TextField";
 import BASE_URL from "../../../base/BaseUrl";
-import { Input } from "@material-tailwind/react";
-import { Add } from "@mui/icons-material";
-import { Card, CardContent, Dialog, Fab, Tooltip } from "@mui/material";
+import { Input, Button } from "@material-tailwind/react";
+import Select from "react-select";
+import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
-
-const status = [
-    {
-      value: "Quotation",
-      label: "Quotation",
-    },
-    {
-        value: "Cancel",
-        label: "Cancel",
-      },
-  ];
-
-
+const statusOptions = [
+  { value: "Quotation", label: "Quotation" },
+  { value: "Cancel", label: "Cancel" },
+];
 
 const EditQuotation = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
 
-const {id} = useParams();
-
-const [quotation, setQuotation] = useState({
+  const [quotation, setQuotation] = useState({
     order_user_id: "",
     quotation_date: "",
     quotation_status: "",
     quotation_count: "",
     quotation_sub_data: "",
     quotation_remarks: "",
-});
-
-
+    quotation_delivery: "",
+    quotation_shipping: "",
+  });
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-
-
-  const useTemplate = {quotation_sub_product_id:"",quotation_sub_rate:"", quotation_sub_quantity:"",id:""};
+  const useTemplate = {
+    quotation_sub_product_id: "",
+    quotation_sub_rate: "",
+    quotation_sub_quantity: "",
+    id: "",
+  };
   const [users, setUsers] = useState([useTemplate]);
+  const [profile, setProfile] = useState([]);
+  const [product, setProducts] = useState([]);
+  const [productOptions, setProductOptions] = useState([]);
 
-  const onChange = (e, index) =>{
-      const updatedUsers = users.map((user, i) => 
-      index == i 
-      ? Object.assign(user,{[e.target.name]: e.target.value}) 
-      : user );
-      setUsers(updatedUsers);
+  // Format product options for react-select
+  useEffect(() => {
+    if (product.length > 0) {
+      const options = product.map((item) => ({
+        value: item.id,
+        label: `${item.product_category}-${item.product_sub_category}-${item.products_brand}-${item.products_thickness}-${item.products_unit}-${item.products_size1}x${item.products_size2}`,
+      }));
+      setProductOptions(options);
+    }
+  }, [product]);
+
+  const onChange = (e, index) => {
+    const updatedUsers = users.map((user, i) =>
+      index === i
+        ? Object.assign(user, { [e.target.name]: e.target.value })
+        : user
+    );
+    setUsers(updatedUsers);
   };
 
+  const onProductChange = (selectedOption, index) => {
+    const updatedUsers = users.map((user, i) =>
+      index === i
+        ? { ...user, quotation_sub_product_id: selectedOption.value }
+        : user
+    );
+    setUsers(updatedUsers);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,50 +85,34 @@ const [quotation, setQuotation] = useState({
         setQuotation(res.data.quotation);
         setUsers(res.data.quotationSub);
       } catch (error) {
-        console.error("Error fetching services:", error);
+        toast.error(error.response.data.message, error);
+             console.error(error.response.data.message, error);
       }
     };
 
     fetchData();
-  }, []);
-
-
+  }, [id]);
 
   const onInputChange = (e) => {
-
     setQuotation({
-    ...quotation,
-    [e.target.name]: e.target.value,
+      ...quotation,
+      [e.target.name]: e.target.value,
     });
-
-};
-
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("id");
-    if (!isLoggedIn) {
-      navigate("/");
-      return;
-    }
-  }, []);
+  };
 
  
-  const [profile, setProfile] = useState([]);
   useEffect(() => {
     axios
-      .get(
-        `${BASE_URL}/api/web-fetch-users`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      )
+      .get(`${BASE_URL}/api/web-fetch-users`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
       .then((res) => {
         setProfile(res.data?.profile);
       });
   }, []);
 
-  const [product, setProducts] = useState([]);
   useEffect(() => {
     axios
       .get(`${BASE_URL}/api/web-fetch-product`, {
@@ -125,10 +125,6 @@ const [quotation, setQuotation] = useState({
       });
   }, []);
 
-
-
-
-
   const onSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
@@ -138,10 +134,12 @@ const [quotation, setQuotation] = useState({
     }
     setIsButtonDisabled(true);
     const formData = {
-        quotation_status: quotation.quotation_status,
-        quotation_sub_data: users,
-        quotation_count: quotation.quotation_count,
-        quotation_remarks: quotation.quotation_remarks,
+      quotation_status: quotation.quotation_status,
+      quotation_sub_data: users,
+      quotation_count: quotation.quotation_count,
+      quotation_remarks: quotation.quotation_remarks,
+      quotation_delivery: quotation.quotation_delivery,
+      quotation_shipping: quotation.quotation_shipping,
     };
     try {
       const response = await axios.put(
@@ -155,154 +153,235 @@ const [quotation, setQuotation] = useState({
       );
 
       if (response.data.code == 200) {
-        toast.success("Quotation Added Successfully");
+        toast.success(response.data.msg);
         navigate("/quotations");
       } else {
         if (response.data.code == 401) {
-          toast.error("Quotation Duplicate Entry");
+          toast.error(response.data.msg);
         } else if (response.data.code == 402) {
-          toast.error("Quotation Duplicate Entry");
+          toast.error(response.data.msg);
         } else {
-          toast.error("An unknown error occurred");
+          toast.error(response.data.msg);
         }
       }
     } catch (error) {
-      console.error("Error updating Quotation:", error);
-      toast.error("Error  updating Quotation");
+      toast.error(error.response.data.message, error);
+           console.error(error.response.data.message, error);
     } finally {
       setIsButtonDisabled(false);
     }
   };
 
-
-
+  // Custom styles for react-select
+  const customStyles = {
+    control: (provided) => ({
+      ...provided,
+      minHeight: "40px",
+      height: "40px",
+      borderRadius: "0.375rem",
+      borderColor: "#e5e7eb",
+      "&:hover": {
+        borderColor: "#9ca3af",
+      },
+    }),
+    valueContainer: (provided) => ({
+      ...provided,
+      height: "40px",
+      padding: "0 8px",
+    }),
+    input: (provided) => ({
+      ...provided,
+      margin: "0px",
+    }),
+    indicatorsContainer: (provided) => ({
+      ...provided,
+      height: "40px",
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected ? "#3b82f6" : "white",
+      color: state.isSelected ? "white" : "#1f2937",
+      "&:hover": {
+        backgroundColor: "#e5e7eb",
+      },
+    }),
+  };
 
   return (
     <Layout>
-      <div>
-        {/* Title */}
-        <div className="flex mb-4 mt-6">
-          <Link to="/brand">
-            <MdKeyboardBackspace className=" text-white bg-[#464D69] p-1 w-10 h-8 cursor-pointer rounded-2xl" />
-          </Link>
-          <h1 className="text-2xl text-[#464D69] font-semibold ml-2 content-center">
-            Edit Quotation
-          </h1>
-        </div>
-        <div className="p-6 mt-5 bg-white shadow-md rounded-lg">
-          <form onSubmit={onSubmit} autoComplete="off">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div className="form-group">
-                <Fields
-                  required={true}
-                  disabled={true}
-                  title="User"
-                  type="userDropdown"
-                  autoComplete="Name"
-                  name="order_user_id"
-                  value={quotation.order_user_id}
-                  onChange={(e) => onInputChange(e)}
-                  options={profile}
-                />
+      <div className="container mx-auto ">
+      
+        <div className="bg-white rounded-t-lg shadow-lg p-1 mx-auto w-full">
+  <div className="flex items-center gap-3 px-4 py-2">
+    <Link to="/quotations">
+      <ArrowLeft className="text-white bg-blue-500 p-1 w-8 h-8 cursor-pointer rounded-full hover:bg-blue-600 transition-colors" />
+    </Link>
+    <h2 className="text-gray-800 text-xl font-semibold">   Edit Quotation</h2>
+  </div>
+</div>
+        <div className="bg-white rounded-b-lg mt-1 p-6">
+          <form onSubmit={onSubmit} autoComplete="off" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* User Dropdown */}
+            
+              {/* User Dropdown */}
+         
+              <div className="w-full">
+              
+                  <Input
+                    label="User"
+                    name="order_user_id"
+                    value={
+                      profile.find((p) => p.id === quotation.order_user_id)
+                        ?.full_name ||
+                      profile.find((p) => p.id === quotation.order_user_id)
+                        ?.user_name ||
+                      ""
+                    }
+                    readOnly
+                    className="cursor-not-allowed"
+                  />
+              
               </div>
-              <div className="form-group">
+              {/* Date Input */}
+              <div>
                 <Input
-                disabled
-                required
+                  readOnly
                   type="date"
                   label="Date"
                   name="quotation_date"
                   value={quotation.quotation_date}
-                  onChange={(e) => onInputChange(e)}
+                  onChange={onInputChange}
+                 className="cursor-not-allowed"
                 />
               </div>
-              <div className="form-group ">
-                <Fields
-                  required={true}
-                  title="Status"
-                  type="whatsappDropdown"
-                  autoComplete="Name"
+
+              {/* Status Dropdown */}
+              <div>
+                <Select
+                  required
                   name="quotation_status"
-                  value={quotation.quotation_status}
-                  onChange={(e) => onInputChange(e)}
-                  options={status}
+                  value={statusOptions.find(
+                    (opt) => opt.value === quotation.quotation_status
+                  )}
+                  options={statusOptions}
+                  onChange={(selectedOption) =>
+                    onInputChange({
+                      target: {
+                        name: "quotation_status",
+                        value: selectedOption.value,
+                      },
+                    })
+                  }
+                  styles={customStyles}
+                  placeholder="Select Status"
+                  className="basic-single"
+                  classNamePrefix="select"
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div className="form-group col-span-3">
-                <Fields
-                  required={true}
-                  title="Remarks"
-                  type="textField"
-                  autoComplete="Name"
+
+            {/* Remark, Delivery, Shipping */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-1">
+                <Input
+                  label="Remark"
                   name="quotation_remarks"
                   value={quotation.quotation_remarks}
-                  onChange={(e) => onInputChange(e)}
+                  onChange={onInputChange}
+                  maxLength={200}
+                />
+              </div>
+              <div className="md:col-span-1">
+                <Input
+                  label="Delivery"
+                  name="quotation_delivery"
+                  value={quotation.quotation_delivery}
+                  onChange={onInputChange}
+                  maxLength={200}
+                />
+              </div>
+              <div className="md:col-span-1">
+                <Input
+                  label="Shipping"
+                  name="quotation_shipping"
+                  value={quotation.quotation_shipping}
+                  onChange={onInputChange}
+                  maxLength={200}
                 />
               </div>
             </div>
-            {
-                users.map((user, index)=>(
-            <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div className="form-group ">
-                {/* <Input
-                  required
-                  label="Name"
-                  type="text"
-                  hidden
-                  name="id"
-                  value={user.id}
-                  onChange={e => onChange(e, index)}
-                /> */}
 
-                <Fields
-                  required={true}
-                  title="Products"
-                  type="productDropdown"
-                  autoComplete="Name"
-                  name="quotation_sub_product_id"
-                  value={user.quotation_sub_product_id}
-                  onChange={e => onChange(e, index)}
-                  options={product}
-                />
+            {/* Product Items */}
+            {users.map((user, index) => (
+              <div
+                key={index}
+                className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              >
+                {/* Product Dropdown */}
+                <div>
+                  {/* <label className="block text-sm font-medium text-gray-700 mb-1">Product *</label> */}
+                  <Select
+                    required
+                    name="quotation_sub_product_id"
+                    value={productOptions.find(
+                      (opt) => opt.value === user.quotation_sub_product_id
+                    )}
+                    options={productOptions}
+                    onChange={(selectedOption) =>
+                      onProductChange(selectedOption, index)
+                    }
+                    styles={customStyles}
+                    placeholder="Select Product"
+                    className="basic-single"
+                    classNamePrefix="select"
+                    isSearchable
+                  />
+                </div>
+
+                {/* Rate Input */}
+                <div>
+                  <Input
+                    required
+                    label="Rate"
+                    type="number"
+                    name="quotation_sub_rate"
+                    value={user.quotation_sub_rate}
+                    onChange={(e) => onChange(e, index)}
+                    // className="!border-t-blue-gray-200 focus:!border-t-gray-900"
+                  />
+                </div>
+
+                {/* Quantity Input */}
+                <div>
+                  <Input
+                    required
+                    label="Quantity"
+                
+                    name="quotation_sub_quantity"
+                    value={user.quotation_sub_quantity}
+                    onChange={(e) => onChange(e, index)}
+                    maxLength={10}
+                    // className="!border-t-blue-gray-200 focus:!border-t-gray-900"
+                  />
+                </div>
               </div>
-              <div className="form-group ">
-                <Fields
-                  required={true}
-                  title="Rate"
-                  type="textField"
-                  autoComplete="Name"
-                  name="quotation_sub_rate"
-                  value={user.quotation_sub_rate}
-                  onChange={e => onChange(e, index)}
-                />
-              </div>
-              <div className="form-group ">
-                <Fields
-                  required={true}
-                  title="Quantity"
-                  type="textField"
-                  autoComplete="Name"
-                  name="quotation_sub_quantity"
-                  value={user.quotation_sub_quantity}
-                  onChange={e => onChange(e, index)}
-                />
-              </div>
-            </div>
-              )  )}
-            <div className="mt-4 text-center">
-              <button
+            ))}
+
+            {/* Buttons */}
+            <div className="flex justify-center space-x-4 mt-8">
+              <Button
                 type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
+                color="blue"
+                className="px-6 py-2 rounded-md"
                 disabled={isButtonDisabled}
               >
                 {isButtonDisabled ? "Updating..." : "Update"}
-              </button>
+              </Button>
               <Link to="/quotations">
-                <button className="bg-green-500 text-white px-4 py-2 rounded-md">
+                <Button color="gray" className="px-6 py-2 rounded-md">
                   Back
-                </button>
+                </Button>
               </Link>
             </div>
           </form>

@@ -164,7 +164,7 @@ const SelectProduct = ({ onSelect, itemIndex }) => {
     );
   return (
     <MUIDataTable
-      title={"select product"}
+      title={"	Select Product"}
       data={data}
       columns={columns}
       options={options}

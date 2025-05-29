@@ -1,29 +1,22 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { MdKeyboardBackspace } from "react-icons/md";
+
 import axios from "axios";
-import { toast } from "react-toastify";
-import { Input } from "@material-tailwind/react";
-import { Add } from "@mui/icons-material";
-import { Card, CardContent, Dialog, Fab, Tooltip } from "@mui/material";
+
 import Layout from "../../layout/Layout";
 import BASE_URL from "../../base/BaseUrl";
-import Fields from "../../common/TextField/TextField";
+import { Input, Button } from "@material-tailwind/react";
+import Select from "react-select";
+import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
-const status = [
-  {
-    value: "Order",
-    label: "Order",
-  },
-  {
-    value: "Cancel",
-    label: "Cancel",
-  },
+const statusOptions = [
+  { value: "Order", label: "Order" },
+  { value: "Cancel", label: "Cancel" },
 ];
 
 const EditOrder = () => {
   const navigate = useNavigate();
-
   const { id } = useParams();
 
   const [order, setOrder] = useState({
@@ -35,18 +28,40 @@ const EditOrder = () => {
   });
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-
   const useTemplate = {
     orders_sub_product_id: "",
     orders_sub_quantity: "",
     id: "",
   };
   const [users, setUsers] = useState([useTemplate]);
+  const [profile, setProfile] = useState([]);
+  const [product, setProducts] = useState([]);
+  const [productOptions, setProductOptions] = useState([]);
+
+  // Format product options for react-select
+  useEffect(() => {
+    if (product.length > 0) {
+      const options = product.map((item) => ({
+        value: item.id,
+        label: `${item.product_category}-${item.product_sub_category}-${item.products_brand}-${item.products_thickness}-${item.products_unit}-${item.products_size1}x${item.products_size2}`,
+      }));
+      setProductOptions(options);
+    }
+  }, [product]);
 
   const onChange = (e, index) => {
     const updatedUsers = users.map((user, i) =>
-      index == i
+      index === i
         ? Object.assign(user, { [e.target.name]: e.target.value })
+        : user
+    );
+    setUsers(updatedUsers);
+  };
+
+  const onProductChange = (selectedOption, index) => {
+    const updatedUsers = users.map((user, i) =>
+      index === i
+        ? { ...user, orders_sub_product_id: selectedOption.value }
         : user
     );
     setUsers(updatedUsers);
@@ -66,12 +81,13 @@ const EditOrder = () => {
         setOrder(res.data.order);
         setUsers(res.data.orderSub);
       } catch (error) {
-        console.error("Error fetching services:", error);
+         toast.error(error.response.data.message, error);
+               console.error(error.response.data.message, error);
       }
     };
 
     fetchData();
-  }, []);
+  }, [id]);
 
   const onInputChange = (e) => {
     setOrder({
@@ -80,15 +96,8 @@ const EditOrder = () => {
     });
   };
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("id");
-    if (!isLoggedIn) {
-      navigate("/");
-      return;
-    }
-  }, []);
 
-  const [profile, setProfile] = useState([]);
+
   useEffect(() => {
     axios
       .get(`${BASE_URL}/api/web-fetch-users`, {
@@ -101,7 +110,6 @@ const EditOrder = () => {
       });
   }, []);
 
-  const [product, setProducts] = useState([]);
   useEffect(() => {
     axios
       .get(`${BASE_URL}/api/web-fetch-product`, {
@@ -139,132 +147,185 @@ const EditOrder = () => {
       );
 
       if (response.data.code == 200) {
-        toast.success("Order Added Successfully");
+        toast.success("Order Updated Successfully");
         navigate("/pending-order-list");
       } else {
         if (response.data.code == 401) {
-          toast.error("Order Duplicate Entry");
+          toast.error(response.data.msg);
         } else if (response.data.code == 402) {
-          toast.error("Order Duplicate Entry");
+          toast.error(response.data.msg);
         } else {
-          toast.error("An unknown error occurred");
+          toast.error(response.data.msg);
         }
       }
     } catch (error) {
-      console.error("Error updating Order:", error);
-      toast.error("Error  updating Order");
+         toast.error(error.response.data.message, error);
+             console.error(error.response.data.message, error);
     } finally {
       setIsButtonDisabled(false);
     }
   };
 
+  // Custom styles for react-select
+  const customStyles = {
+    control: (provided) => ({
+      ...provided,
+      minHeight: "40px",
+      height: "40px",
+      borderRadius: "0.375rem",
+      borderColor: "#e5e7eb",
+      "&:hover": {
+        borderColor: "#9ca3af",
+      },
+    }),
+    valueContainer: (provided) => ({
+      ...provided,
+      height: "40px",
+      padding: "0 8px",
+    }),
+    input: (provided) => ({
+      ...provided,
+      margin: "0px",
+    }),
+    indicatorsContainer: (provided) => ({
+      ...provided,
+      height: "40px",
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected ? "#3b82f6" : "white",
+      color: state.isSelected ? "white" : "#1f2937",
+      "&:hover": {
+        backgroundColor: "#e5e7eb",
+      },
+    }),
+  };
+
   return (
     <Layout>
-      <div>
-        <div className="flex mb-4 mt-6">
-          <Link to="/pending-order-list">
-            <MdKeyboardBackspace className=" text-white bg-[#464D69] p-1 w-10 h-8 cursor-pointer rounded-2xl" />
-          </Link>
-          <h1 className="text-2xl text-[#464D69] font-semibold ml-2 content-center">
-            Edit Order
-          </h1>
-        </div>
-        <div className="p-6 mt-5 bg-white shadow-md rounded-lg">
-          <form onSubmit={onSubmit} autoComplete="off">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div className="form-group">
-                <Fields
-                 disabled={true}
-                  required={true}
-                  title="User"
-                  type="userDropdown"
-                  autoComplete="Name"
+      <div className="container mx-auto">
+        
+        <div className="bg-white rounded-t-lg shadow-lg p-1 mx-auto w-full">
+  <div className="flex items-center gap-3 px-4 py-2">
+    <Link to="/pending-order-list">
+      <ArrowLeft className="text-white bg-blue-500 p-1 w-8 h-8 cursor-pointer rounded-full hover:bg-blue-600 transition-colors" />
+    </Link>
+    <h2 className="text-gray-800 text-xl font-semibold">  Edit Pending Order</h2>
+  </div>
+</div>
+        <div className="bg-white rounded-b-lg mt-1 p-6">
+          <form onSubmit={onSubmit} autoComplete="off" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* User Input */}
+              <div className="w-full">
+                <Input
+                  label="User"
                   name="orders_user_id"
-                  value={order.orders_user_id}
-                  onChange={(e) => onInputChange(e)}
-                  options={profile}
+                  value={
+                    profile.find((p) => p.id === order.orders_user_id)
+                      ?.full_name ||
+                    profile.find((p) => p.id === order.orders_user_id)
+                      ?.user_name ||
+                    ""
+                  }
+                  readOnly
+                  className="cursor-not-allowed"
                 />
               </div>
-              <div className="form-group">
+              
+              {/* Date Input */}
+              <div>
                 <Input
-                 disabled
-                  required
+                  readOnly
                   type="date"
                   label="Date"
                   name="orders_date"
                   value={order.orders_date}
-                  onChange={(e) => onInputChange(e)}
-                  InputLabelProps={{
-                    className: "text-red-500", 
-                  }}
-                
+                  onChange={onInputChange}
+                  className="cursor-not-allowed"
                 />
               </div>
-              <div className="form-group ">
-                <Fields
-                  required={true}
-                  title="Status"
-                  type="whatsappDropdown"
-                  autoComplete="Name"
+
+              {/* Status Dropdown */}
+              <div>
+                <Select
+                  required
                   name="orders_status"
-                  value={order.orders_status}
-                  onChange={(e) => onInputChange(e)}
-                  options={status}
+                  value={statusOptions.find(
+                    (opt) => opt.value === order.orders_status
+                  )}
+                  options={statusOptions}
+                  onChange={(selectedOption) =>
+                    onInputChange({
+                      target: {
+                        name: "orders_status",
+                        value: selectedOption.value,
+                      },
+                    })
+                  }
+                  styles={customStyles}
+                  placeholder="Select Status"
+                  className="basic-single"
+                  classNamePrefix="select"
                 />
               </div>
             </div>
+
+            {/* Product Items */}
             {users.map((user, index) => (
               <div
                 key={index}
-                className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"
+                className="grid grid-cols-1 md:grid-cols-3 gap-6"
               >
-                <div className="form-group col-span-2">
-                  {/* <Input
-                  required
-                  label="Name"
-                  type="text"
-                  hidden
-                  name="id"
-                  value={user.id}
-                  onChange={e => onChange(e, index)}
-                /> */}
-
-                  <Fields
-                    required={true}
-                    title="Products"
-                    type="productDropdown"
-                    autoComplete="Name"
+                {/* Product Dropdown */}
+                <div className="md:col-span-2">
+                  <Select
+                    required
                     name="orders_sub_product_id"
-                    value={user.orders_sub_product_id}
-                    onChange={(e) => onChange(e, index)}
-                    options={product}
+                    value={productOptions.find(
+                      (opt) => opt.value === user.orders_sub_product_id
+                    )}
+                    options={productOptions}
+                    onChange={(selectedOption) =>
+                      onProductChange(selectedOption, index)
+                    }
+                    styles={customStyles}
+                    placeholder="Select Product"
+                    className="basic-single"
+                    classNamePrefix="select"
+                    isSearchable
                   />
                 </div>
-                <div className="form-group ">
-                  <Fields
-                    required={true}
-                    title="Quantity"
-                    type="textField"
-                    autoComplete="Name"
+
+                {/* Quantity Input */}
+                <div>
+                  <Input
+                    required
+                    label="Quantity"
+                   
                     name="orders_sub_quantity"
                     value={user.orders_sub_quantity}
                     onChange={(e) => onChange(e, index)}
+                    maxLength={6}
                   />
                 </div>
               </div>
             ))}
-            <div className="mt-4 text-center">
-              <button
+
+            {/* Buttons */}
+            <div className="flex justify-center space-x-4 mt-8">
+              <Button
                 type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
+                color="blue"
+                className="px-6 py-2 rounded-md"
                 disabled={isButtonDisabled}
               >
                 {isButtonDisabled ? "Updating..." : "Update"}
-              </button>
+              </Button>
               <Link to="/pending-order-list">
-                <button className="bg-green-500 text-white px-4 py-2 rounded-md">
+                <Button color="gray" className="px-6 py-2 rounded-md">
                   Back
-                </button>
+                </Button>
               </Link>
             </div>
           </form>

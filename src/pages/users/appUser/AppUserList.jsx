@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, {  useEffect, useState } from 'react'
 import Layout from '../../../layout/Layout'
 import UserTeamFilter from '../../../components/UserTeamFilter';
 import MUIDataTable from 'mui-datatables';
@@ -6,22 +6,21 @@ import ToggleSwitch from '../../../components/ToggleSwitch';
 import axios from 'axios';
 import BASE_URL from '../../../base/BaseUrl';
 import { useNavigate } from 'react-router-dom';
-import { ContextPanel } from '../../../utils/ContextPanel';
-import toast from 'react-hot-toast';
+import { Loader2 } from 'lucide-react';
+
 import { CircularProgress } from '@mui/material';
+import { toast } from 'sonner';
+
 
 const AppUserList = () => {
   const [userListData, setUserListData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { isPanelUp } = useContext(ContextPanel);
+    const [toggleLoadingId, setToggleLoadingId] = useState(null);
   const navigate = useNavigate();
   useEffect(() => {
     const fetchUserListData = async () => {
       try {
-        if (!isPanelUp) {
-          navigate("/maintenance");
-          return;
-        }
+       
         setLoading(true);
         const token = localStorage.getItem("token");
         const response = await axios.get(
@@ -35,7 +34,8 @@ const AppUserList = () => {
 
         setUserListData(response.data?.profile);
       } catch (error) {
-        console.error("Error fetching user  list data", error);
+       toast.error(error.response.data.message, error);
+                 console.error(error.response.data.message, error);
       } finally {
         setLoading(false);
       }
@@ -47,11 +47,8 @@ const AppUserList = () => {
   const handleUpdate = async (e, id) => {
     e.preventDefault();
     try {
-      if (!isPanelUp) {
-        navigate("/maintenance");
-        return;
-      }
-      setLoading(true);
+     
+      setToggleLoadingId(id)
       const token = localStorage.getItem("token");
       const res = await axios({
         url: BASE_URL + "/api/web-update-users/" + id,
@@ -68,9 +65,9 @@ const AppUserList = () => {
                 user.user_status === "Active" ? "Inactive" : "Active";
 
               if (newStatus === "Active") {
-                toast.success("User Activated Successfully");
+                toast.success(res.data.msg);
               } else {
-                toast.success("User Inactivated Successfully");
+                toast.success(res.data.msg);
               }
 
               return { ...user, user_status: newStatus };
@@ -79,13 +76,13 @@ const AppUserList = () => {
           });
         });
       } else {
-        toast.error("Errro occur while Inactive the profile");
+        toast.error(res.data.msg);
       }
     } catch (error) {
-      console.error("Error fetching user activate data", error);
-      toast.error("Error fetching user activate data");
+        toast.error(error.response.data.message, error);
+                console.error(error.response.data.message, error);
     } finally {
-      setLoading(false);
+      setToggleLoadingId(null);
     }
   };
 
@@ -145,13 +142,21 @@ const AppUserList = () => {
         sort: false,
         customBodyRender: (id, tableMeta) => {
           const user = userListData[tableMeta.rowIndex];
+          const isLoading = toggleLoadingId === id;
           return (
             <div className="flex">
-              <ToggleSwitch
+              {/* <ToggleSwitch
                 isActive={user.user_status === "Active"}
                 onToggle={(e) => handleUpdate(e, id)}
-              />
-              
+              /> */}
+                  {isLoading ? (
+        <Loader2 className="animate-spin text-blue-500" />
+      ) : (
+        <ToggleSwitch
+          isActive={user.user_status === "Active"}
+          onToggle={(e) => handleUpdate(e, id)}
+        />
+      )}
             </div>
           );
         },

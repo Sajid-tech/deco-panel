@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { MdKeyboardBackspace } from "react-icons/md";
-import axios from "axios";
-import { toast } from "react-toastify";
-import Layout from "../../../layout/Layout";
-import Fields from "../../../common/TextField/TextField";
-import BASE_URL from "../../../base/BaseUrl";
-import { Input } from "@material-tailwind/react";
 
+import axios from "axios";
+
+import Layout from "../../../layout/Layout";
+
+import BASE_URL from "../../../base/BaseUrl";
+import { Button, Input } from "@material-tailwind/react";
+import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 const status = [
   {
     value: "Active",
@@ -72,6 +74,7 @@ useEffect(() => {
     fetchData();
   }, []);
 
+  
   const onSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
@@ -79,83 +82,102 @@ useEffect(() => {
       form.reportValidity();
       return;
     }
+  
     setIsButtonDisabled(true);
-   
+  
     const data = new FormData();
     data.append("product_category", category.product_category);
     data.append("product_category_image", selectedFile);
     data.append("product_category_status", category.product_category_status);
     data.append("product_sort", category.product_sort);
- 
-    axios({
-      url: `${BASE_URL}/api/web-update-category/${id}?_method=PUT`,
-      method: "POST",
-      data,
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }).then((res) => {
+  
+    try {
+      const res = await axios({
+        url: `${BASE_URL}/api/web-update-category/${id}?_method=PUT`,
+        method: "POST",
+        data,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+  
       if (res.data.code === 200) {
-        toast.success("Caterogies Updated Successfully");
+        toast.success(res.data.msg);
         navigate("/categories");
-        setIsButtonDisabled(false);
       } else {
-        toast.error("duplicate entry");
+        toast.error(res.data.msg);
       }
-    });
+    } catch (error) {
+             toast.error(error.response.data.message, error);
+             console.error(error.response.data.message, error);
+    } finally {
+      setIsButtonDisabled(false);
+    }
   };
 
+  
+  
+  const imageUrl = category.product_category_image
+  ? "https://decopanel.in/storage/app/public/product_category/" +
+  category.product_category_image
+  : "https://decopanel.in/storage/app/public/no_image.jpg";
   return (
     <Layout>
-      <div>
-        {/* Title */}
-        <div className="flex mb-4 mt-6">
-          <Link to="/categories">
-            <MdKeyboardBackspace className=" text-white bg-[#464D69] p-1 w-10 h-8 cursor-pointer rounded-2xl" />
-          </Link>
-          <h1 className="text-2xl text-[#464D69] font-semibold ml-2 content-center">
-            Edit Categories
-          </h1>
+       <div className="container mx-auto ">
+
+       
+
+        <div className="bg-white rounded-t-lg shadow-lg p-1 mx-auto w-full">
+          <div className="flex items-center gap-3 px-4 py-2">
+            <Link to="/categories">
+              <ArrowLeft className="text-white bg-blue-500 p-1 w-8 h-8 cursor-pointer rounded-full hover:bg-blue-600 transition-colors" />
+            </Link>
+            <h2 className="text-gray-800 text-xl font-semibold">
+              {" "}
+              Edit Categories
+            </h2>
+          </div>
         </div>
-        <div className="p-6 mt-5 bg-white shadow-md rounded-lg">
-          <form onSubmit={onSubmit} autoComplete="off">
+
+        
+        <div className="bg-white rounded-b-lg mt-1 p-6">
+        <form onSubmit={onSubmit} autoComplete="off" className="space-y-6">
             <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
               <div>
                 <div className="col-md-4 col-12 mt-4">
                   <img
-                    src={
-                      "https://decopanel.in/storage/app/public/product_category/" +
-                      category.product_category_image
-                    }
+                    src={imageUrl}
                     style={{ width: "215px", height: "215px" }}
+                      loading="lazy"
                   />
                 </div>
               </div>
               <div className="col-span-2 mt-4">
                 <div className="flex flex-col gap-6 mb-6 col-span-2">
                   <div className="form-group">
-                    <Fields
-                      required={true}
-                      types="text"
-                      title="Category"
-                      type="textField"
-                      autoComplete="Name"
-                      name="product_category"
-                      value={category.product_category}
-                      onChange={(e) => onInputChange(e)}
-                    />
+               
+                     <Input
+                                  label="Category Name"
+                                 required
+                                  autoComplete="Name"
+                                  name="product_category"
+                                  value={category.product_category}
+                                  onChange={(e) => onInputChange(e)}
+                                  maxLength={100}
+                                />
                   </div>
   <div className="form-group">
-                    <Fields
-                      required={true}
-                      types="number"
-                      title="Sort "
-                      type="textField"
-                      autoComplete="off"
-                      name="product_sort"
-                      value={category.product_sort}
-                      onChange={(e) => onInputChange(e)}
-                    />
+                  
+                       <Input
+                                               label="Sort"
+                                              required
+                                               autoComplete="Name"
+                                               name="product_sort"
+                                               placeholder="0-99"
+                                               value={category.product_sort}
+                                               onChange={(e) => onInputChange(e)}
+                                               maxLength={6}
+                                             />
                   </div>
 
                   <div>
@@ -167,34 +189,47 @@ useEffect(() => {
                     />
                   </div>
                   <div>
-                    <Fields
-                      required={true}
-                      title="Status"
-                      type="whatsappDropdown"
-                      autoComplete="Name"
-                      name="product_category_status"
-                      value={category.product_category_status}
-                      onChange={(e) => onInputChange(e)}
-                      options={status}
-                    />
+                   
+                     <FormControl fullWidth>
+                                    <InputLabel id="size-unit-select-label">
+                                      <span className="text-sm relative bottom-[6px]">Status</span>
+                                    </InputLabel>
+                                    <Select
+                                      sx={{ height: "40px", borderRadius: "5px" }}
+                                      labelId="size-unit-select-label"
+                                      id="size-unit-select"
+                                      name="product_category_status"
+                                      value={category.product_category_status}
+                                      label="Size Unit"
+                                      onChange={(e) => onInputChange(e)}
+                                    >
+                                      {status.map((option) => (
+                                        <MenuItem key={option.value} value={option.value}>
+                                          {option.label}
+                                        </MenuItem>
+                                      ))}
+                                    </Select>
+                                  </FormControl>
                   </div>
-                  <div className="mt-4 text-center">
-                    <button
-                      type="submit"
-                      className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
-                      disabled={isButtonDisabled}
-                    >
-                      {isButtonDisabled ? "Updating..." : "Update"}
-                    </button>
-                    <Link to="/categories">
-                      <button className="bg-green-500 text-white px-4 py-2 rounded-md">
-                        Back
-                      </button>
-                    </Link>
-                  </div>
+                  
                 </div>
               </div>
             </div>
+             <div className="flex justify-center space-x-4 mt-8">
+                          <Button
+                            type="submit"
+                            color="blue"
+                            className="px-6 py-2 rounded-md"
+                            disabled={isButtonDisabled}
+                          >
+                            {isButtonDisabled ? "Updating..." : "Update"}
+                          </Button>
+                          <Link to="/categories">
+                            <Button color="gray" className="px-6 py-2 rounded-md">
+                              Back
+                            </Button>
+                          </Link>
+                        </div>
           </form>
         </div>
       </div>

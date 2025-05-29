@@ -3,6 +3,8 @@ import {
     User,
     Users,
     FileText,
+    FilePlus2,
+    ClipboardList,
    
   } from "lucide-react";
   
@@ -29,13 +31,13 @@ import {
       {
         id: "create-order",
         title: "Create Order",
-        icon: FileText,
+        icon: FilePlus2,
         href: "/create-order",
       },
       {
         id: "order-list",
         title: "Order List",
-        icon: FileText,
+        icon: ClipboardList,
         href: "/order-list-nav",
       },
       {

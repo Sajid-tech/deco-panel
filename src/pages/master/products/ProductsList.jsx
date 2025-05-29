@@ -8,6 +8,7 @@ import BASE_URL from "../../../base/BaseUrl";
 import Layout from "../../../layout/Layout";
 import MasterFilter from "../../../components/MasterFilter";
 import { Badge, Chip, CircularProgress, Stack } from "@mui/material";
+import { toast } from "sonner";
 
 const ProductsList = () => {
   const [productData, setProductData] = useState(null);
@@ -32,7 +33,8 @@ const ProductsList = () => {
         const res = response.data?.products;
         setProductData(res);
       } catch (error) {
-        console.error("Error fetching Catagory data", error);
+        toast.error(error.response.data.message, error);
+        console.error(error.response.data.message, error);
       } finally {
         setLoading(false);
       }
@@ -49,14 +51,15 @@ const ProductsList = () => {
         filter: false,
         sort: false,
         customBodyRender: (products_image) => {
+          const imageUrl = products_image
+          ? "https://decopanel.in/storage/app/public/allimages/" + products_image
+          : "https://decopanel.in/storage/app/public/no_image.jpg";
           return (
             <img
-              src={
-                "https://decopanel.in/storage/app/public/allimages/" +
-                products_image
-              }
+              src={imageUrl }
               className="media-object rounded-full w-14 h-14"
               alt="Product"
+                loading="lazy"
             />
           );
         },

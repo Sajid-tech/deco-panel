@@ -9,7 +9,8 @@ import {
 import Layout from "../../layout/Layout";
 import BASE_URL from "../../base/BaseUrl";
 import axios from "axios";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
+
 
 const Profile = () => {
   const [profile, setProfile] = useState({
@@ -94,7 +95,7 @@ const Profile = () => {
 
   return (
     <Layout>
-      <div className="mt-12 mb-8 flex flex-col gap-12">
+      <div className="mt-6 mb-8 flex flex-col gap-12">
         <Card>
           <CardHeader variant="gradient" color="white" className="mb-8 p-6">
             <Typography variant="h6" color="black">
@@ -106,66 +107,80 @@ const Profile = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="w-full">
                   <div className="mb-4">
-                    <Input
-                      label="Full Name"
-                      type="text"
-                      name="full_name"
-                      value={profile.full_name}
-                      onChange={(e) => onInputChange(e)}
-                    />
+                  <Input
+  label="Full Name"
+  type="text"
+  name="full_name"
+  value={profile.full_name}
+  maxLength={50}
+  onChange={onInputChange}
+/>
                   </div>
 
                   <div className="mb-4">
-                    <Input
-                      label="Mobile No"
-                      type="tel"
-                      maxLength={10}
-                      name="mobile"
-                      value={profile.mobile}
-                      onChange={(e) => onInputChange(e)}
-                    />
+                  
+<Input
+  label="Mobile No"
+  type="tel"
+  name="mobile"
+  value={profile.mobile}
+  maxLength={10}
+  pattern="[0-9]*"
+  onChange={onInputChange}
+/>
                   </div>
 
                   <div className="mb-4">
-                    <Input
-                      label="Email Id"
-                      type="email"
-                      name="email"
-                      value={profile.email}
-                      onChange={(e) => onInputChange(e)}
-                    />
+                  
+
+<Input
+  label="Email Id"
+  type="email"
+  name="email"
+  value={profile.email}
+  maxLength={100}
+  onChange={onInputChange}
+/>
                   </div>
                 </div>
                 <div>
                   <div className="mb-4">
-                    <Input
-                      label="Address"
-                      type="text"
-                      value={profile.address}
-                      name="address"
-                      placeholder="Enter your name"
-                      onChange={(e) => onInputChange(e)}
-                    />
+                  
+<Input
+  label="Address"
+  type="text"
+  name="address"
+  value={profile.address}
+  maxLength={250}
+  onChange={onInputChange}
+/>
                   </div>
 
                   <div className="mb-4">
-                    <Input
-                      label="State"
-                      type="text"
-                      value={profile.state}
-                      name="state"
-                      onChange={(e) => onInputChange(e)}
-
-                    />
+                  <Input
+  label="State"
+  type="text"
+  name="state"
+  value={profile.state}
+  maxLength={50}
+  onChange={onInputChange}
+/>
                   </div>
 
                   <div className="mb-4">
-                    <Input
-                      label="Pincode"
-                      onChange={(e) => onInputChange(e)}
-                      name="pincode"
-                      value={profile.pincode}
-                    />
+                    
+<Input
+  label="Pincode"
+  type="number"
+  name="pincode"
+  value={profile.pincode}
+  onChange={(e) => {
+    if (e.target.value.length <= 6) {
+      onInputChange(e);
+    }
+  }}
+  inputMode="numeric"
+/>
                   </div>
                 </div>
               </div>

@@ -20,7 +20,7 @@ export function Footer() {
             },
           }
         );
-        console.log(res)
+    
         setDateYear(res.data?.year?.current_year);
       } catch (error) {
         console.error("Error fetching services:", error);

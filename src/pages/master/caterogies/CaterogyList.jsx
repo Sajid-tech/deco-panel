@@ -54,14 +54,14 @@ const CaterogyList = () => {
         sort: false,
         customBodyRender: (product_category_image) => {
           const imageUrl = product_category_image
-          ? "https://decopanel.in/storage/app/public/product_category/" + product_category_image
-          : "https://decopanel.in/storage/app/public/no_image.jpg";
+          ? "https://decopanel.in/storage/product_category/" + product_category_image
+          : "https://decopanel.in/storage/no_image.jpg";
           return (
             <img
               src={imageUrl}
               className="media-object rounded-full w-14 h-14"
                 loading="lazy"
-              alt="Product Category"
+              alt="Category"
             />
           );
         },

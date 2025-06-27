@@ -52,8 +52,8 @@ const SubCategoriesList = () => {
         sort: false,
         customBodyRender: (product_sub_category_image) => {
           const imageUrl = product_sub_category_image
-          ? "https://decopanel.in/storage/app/public/product_category/" + product_sub_category_image
-          : "https://decopanel.in/storage/app/public/no_image.jpg";
+          ? "https://decopanel.in/storage/product_category/" + product_sub_category_image
+          : "https://decopanel.in/storage/no_image.jpg";
           return (
             <img
               src={imageUrl

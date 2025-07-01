@@ -1,4 +1,4 @@
-import React, {  useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Link, useNavigate } from "react-router-dom";
 import MUIDataTable from "mui-datatables";
@@ -20,7 +20,6 @@ const SubCategoriesList = () => {
   useEffect(() => {
     const fetchCountryData = async () => {
       try {
-       
         setLoading(true);
         const token = localStorage.getItem("token");
         const response = await axios.get(
@@ -52,15 +51,15 @@ const SubCategoriesList = () => {
         sort: false,
         customBodyRender: (product_sub_category_image) => {
           const imageUrl = product_sub_category_image
-          ? "https://decopanel.in/storage/product_category/" + product_sub_category_image
-          : "https://decopanel.in/storage/no_image.jpg";
+            ? "https://decopanel.in/storage/app/public/product_category/" +
+              product_sub_category_image
+            : "https://decopanel.in/storage/app/public/no_image.jpg";
           return (
             <img
-              src={imageUrl
-              }
+              src={imageUrl}
               className="media-object rounded-full w-14 h-14"
               alt="Sub Category"
-                loading="lazy"
+              loading="lazy"
             />
           );
         },

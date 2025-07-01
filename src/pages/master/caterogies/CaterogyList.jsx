@@ -1,4 +1,4 @@
-import React, {  useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Link, useNavigate } from "react-router-dom";
 import MUIDataTable from "mui-datatables";
@@ -17,10 +17,8 @@ const CaterogyList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-
     const fetchCountryData = async () => {
       try {
-       
         setLoading(true);
         const token = localStorage.getItem("token");
         const response = await axios.get(
@@ -40,9 +38,8 @@ const CaterogyList = () => {
         setLoading(false);
       }
     };
-   
+
     fetchCountryData();
-   
   }, []);
 
   const columns = [
@@ -54,13 +51,14 @@ const CaterogyList = () => {
         sort: false,
         customBodyRender: (product_category_image) => {
           const imageUrl = product_category_image
-          ? "https://decopanel.in/storage/product_category/" + product_category_image
-          : "https://decopanel.in/storage/no_image.jpg";
+            ? "https://decopanel.in/storage/app/public/product_category/" +
+              product_category_image
+            : "https://decopanel.in/storage/app/public/no_image.jpg";
           return (
             <img
               src={imageUrl}
               className="media-object rounded-full w-14 h-14"
-                loading="lazy"
+              loading="lazy"
               alt="Category"
             />
           );
@@ -91,13 +89,18 @@ const CaterogyList = () => {
         sort: true,
         customBodyRender: (product_category_status) => {
           return (
-            <div className="w-fit px-2 py-1 text-sm font-medium rounded-md 
+            <div
+              className="w-fit px-2 py-1 text-sm font-medium rounded-md 
             text-center 
               bg-blue-100 text-blue-800"
-              style={product_category_status !== "Active" ? {
-                backgroundColor: "#fef08a", 
-                color: "#1c1917" 
-              } : {}}
+              style={
+                product_category_status !== "Active"
+                  ? {
+                      backgroundColor: "#fef08a",
+                      color: "#1c1917",
+                    }
+                  : {}
+              }
             >
               {product_category_status === "Active" ? "Active" : "Inactive"}
             </div>
@@ -133,36 +136,33 @@ const CaterogyList = () => {
     viewColumns: false,
     download: false,
     print: false,
-     customToolbar: () => {
-          return (
-           
-               <button
-               onClick={() => navigate("/add-categories")}
-               className="btn btn-primary text-center md:text-right text-white bg-blue-600 hover:bg-blue-700 text-sm px-2 py-1 rounded shadow-md"
-             >
-                + Category
-             </button>
-          );
-        },
-        textLabels: {
-          body: {
-            noMatch: loading ? (
-              <CircularProgress />
-            ) : (
-              "Sorry, there is no matching data to display"
-            ),
-          },
-        },
-    
+    customToolbar: () => {
+      return (
+        <button
+          onClick={() => navigate("/add-categories")}
+          className="btn btn-primary text-center md:text-right text-white bg-blue-600 hover:bg-blue-700 text-sm px-2 py-1 rounded shadow-md"
+        >
+          + Category
+        </button>
+      );
+    },
+    textLabels: {
+      body: {
+        noMatch: loading ? (
+          <CircularProgress />
+        ) : (
+          "Sorry, there is no matching data to display"
+        ),
+      },
+    },
   };
   return (
     <Layout>
-    
       <MasterFilter />
-    
+
       <div className="mt-1">
         <MUIDataTable
-        title="Categories List"
+          title="Categories List"
           data={categoriyListData ? categoriyListData : []}
           columns={columns}
           options={options}

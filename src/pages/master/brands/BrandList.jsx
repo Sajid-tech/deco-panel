@@ -53,8 +53,8 @@ const BrandList = () => {
         sort: false,
         customBodyRender: (brands_image) => {
           const imageUrl = brands_image
-          ? "https://decopanel.in/storage/allimages/" + brands_image
-          : "https://decopanel.in/storage/no_image.jpg";
+          ? "https://decopanel.in/storage/app/public/allimages/" + brands_image
+          : "https://decopanel.in/storage/app/public/no_image.jpg";
           return (
             <img
               src={imageUrl}

@@ -269,13 +269,13 @@ const Home = () => {
                           <div key={index} className="min-w-full h-[450px]">
                             <div className="flex flex-col items-center">
                               <img
-                                src={`https://decopanel.in/storage/product_category/${product.product_category_image}`}
+                                src={`https://decopanel.in/storage/app/public/product_category/${product.product_category_image}`}
                                 alt="product"
                                 className="w-[400px]"
                                 loading="lazy"
                                 onError={(e) => {
                                   e.target.onerror = null;
-                                  e.target.src = "https://decopanel.in/storage/no_image.jpg";
+                                  e.target.src = "https://decopanel.in/storage/app/public/no_image.jpg";
                                 }}
                               />
                               <h3 className="text-center">
